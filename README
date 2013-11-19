@@ -1,3 +1,4 @@
 Brainkkake
+==========
 
-A parallel brainfuck implementation as a scala DSL.
+A parallel version of Brainfuck implemented using a Scala DSL.
