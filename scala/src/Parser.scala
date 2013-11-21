@@ -33,6 +33,7 @@ class Parser extends RegexParsers {
         case "," => new InputOperation()
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
+        case _ => new UnknownOperation()
     }
 
     //A loop in the code

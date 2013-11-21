@@ -8,9 +8,9 @@
     <ignored path="brainkkake.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385074560825" ignored="false" />
-    <file path="/Parser.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385077753073" ignored="false" />
+    <file path="/Parser.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385077992195" ignored="false" />
     <file path="/BrainkkakeExecutor.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385074766199" ignored="false" />
-    <file path="/Interpreter.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385077787939" ignored="false" />
+    <file path="/Interpreter.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385078031591" ignored="false" />
     <file path="/a.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385076952273" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -75,7 +75,7 @@
       <file leaf-file-name="Parser.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala/src/Parser.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="20" selection-start="675" selection-end="675" vertical-scroll-proportion="0.0">
+            <state line="26" column="27" selection-start="820" selection-end="820" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -102,7 +102,7 @@
       <file leaf-file-name="Interpreter.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scala/src/Interpreter.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="37" column="17" selection-start="1030" selection-end="1030" vertical-scroll-proportion="0.7581967">
+            <state line="45" column="51" selection-start="1262" selection-end="1262" vertical-scroll-proportion="0.84016395">
               <folding />
             </state>
           </provider>
@@ -491,14 +491,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scala/src/Parser.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="20" selection-start="675" selection-end="675" vertical-scroll-proportion="0.0">
+        <state line="26" column="27" selection-start="820" selection-end="820" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scala/src/Interpreter.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="37" column="17" selection-start="1030" selection-end="1030" vertical-scroll-proportion="0.7581967">
+        <state line="45" column="51" selection-start="1262" selection-end="1262" vertical-scroll-proportion="0.84016395">
           <folding />
         </state>
       </provider>
