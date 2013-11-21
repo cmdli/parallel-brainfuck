@@ -3,13 +3,13 @@
  **/
 class Interpreter {
 
-    // TODO: Make this dynamic?
+    // Should be big enough
     val sizeOfData =  1000000
 
     // Makes a zeroed out array.
     var dataArr = Array.fill[Byte](sizeOfData)(0)
 
-    // TODO: We can't go backwards (left) of the start like this.
+    // Program starts in the middle of the "infinite" array
     var dataPointer = sizeOfData/2
 
     def runProgram(program: List[Operation]):Array[Byte] = {
@@ -19,6 +19,7 @@ class Interpreter {
         dataArr
     }
 
+    //Run one operation
     def runOp(op: Operation): Unit = op match {
         case AddOperation() => add()
         case SubOperation() => subtract()
@@ -41,6 +42,7 @@ class Interpreter {
 
     def shiftLeft() = dataPointer -= 1
 
+    //Run a loop by running the code inside of it while data is zero
     def loop(loopOperations: List[Operation]) = {
         while (dataArr(dataPointer) != 0) {
             for (op: Operation <- loopOperations) {
