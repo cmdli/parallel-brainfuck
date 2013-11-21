@@ -4,7 +4,13 @@ object TestExecutor {
       val executor = new BrainkkakeExecutor()
 
       // Prints "#"
-      val program:List[Operation] = parser.parse("+++++[>+++++++<-]>.").get
-      executor.runProgram(program)
+      val programOutput:List[Operation] = parser.parse("+++++[>+++++++<-]>.").get
+      executor.runProgram(programOutput)
+
+      // Prints input char
+      val programInput:List[Operation] = parser.parse(",.").get
+      println("\nEnter a char: ")
+      executor.runProgram(programInput)
+
    }
 }

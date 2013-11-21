@@ -22,6 +22,7 @@ class BrainkkakeExecutor {
     case AddOperation() => add()
     case SubOperation() => subtract()
     case PrintOperation() => printData()
+    case InputOperation() => scan()
     case ShiftRightOperation() => shiftRight()
     case ShiftLeftOperation() => shiftLeft()
     case LoopOperations(operations) => maybePerformLoop(operations)
@@ -32,6 +33,8 @@ class BrainkkakeExecutor {
   def subtract() = dataArr(dataPointer) -= 1
 
   def printData() = print(dataArr(dataPointer).toChar)
+
+  def scan() = dataArr(dataPointer) = readChar()
 
   def shiftRight() = dataPointer += 1
 

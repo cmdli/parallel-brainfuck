@@ -7,6 +7,7 @@ abstract class Operation()
 case class AddOperation() extends Operation()
 case class SubOperation() extends Operation()
 case class PrintOperation() extends Operation()
+case class InputOperation() extends Operation()
 case class ShiftRightOperation() extends Operation()
 case class ShiftLeftOperation() extends Operation()
 case class LoopOperations(ops: List[Operation]) extends Operation() {
@@ -19,14 +20,16 @@ class Parser extends RegexParsers {
 
      def parser(): Parser[List[Operation]] = rep(parseLoop | char)
 
-     def char: Parser[Operation] = ("+" | "-" | "." | ">" | "<") ^^ {
+     def char: Parser[Operation] = ("+" | "-" | "." | ","| ">" | "<") ^^ {
        case "+" => new AddOperation()
        case "-" => new SubOperation()
        case "." => new PrintOperation()
+       case "," => new InputOperation()
        case ">" => new ShiftRightOperation()
        case "<" => new ShiftLeftOperation()
      }
 
+     // TODO: Make sure this works on nested loops
      def parseLoop(): Parser[Operation] = ("[" ~ rep(char) ~ "]") ^^ {
        case "[" ~ operations ~ "]" => new LoopOperations(operations)
      }
