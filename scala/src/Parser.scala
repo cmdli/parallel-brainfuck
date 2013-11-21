@@ -16,6 +16,8 @@ case class LoopOperations(ops: List[Operation]) extends Operation() {
 case class UnknownOperation() extends Operation()
 
 class Parser extends RegexParsers {
+    override def skipWhitespace = true
+
     def parse(code: String) = parseAll(parser(), code)
 
     def parser(): Parser[List[Operation]] = rep(parseLoop | char)
