@@ -30,7 +30,7 @@ class Parser extends RegexParsers {
      }
 
      // TODO: Make sure this works on nested loops
-     def parseLoop(): Parser[Operation] = ("[" ~ rep(char) ~ "]") ^^ {
+     def parseLoop(): Parser[Operation] = ("[" ~ parser() ~ "]") ^^ {
        case "[" ~ operations ~ "]" => new LoopOperations(operations)
      }
 }

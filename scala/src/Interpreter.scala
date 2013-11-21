@@ -1,22 +1,23 @@
 /**
  * Performs the actions specified by the BK program.
  */
-class BrainkkakeExecutor {
+class Interpreter {
+
   // TODO: Make this dynamic?
-  val sizeOfData = 100
+  val sizeOfData =  1000000
 
   // Makes a zeroed out array.
-  var dataArr = Array.fill[Int](sizeOfData)(0)
+  var dataArr = Array.fill[Byte](sizeOfData)(0)
 
   // TODO: We can't go backwards (left) of the start like this.
-  var dataPointer = 0
+  var dataPointer = sizeOfData/2
 
   def runProgram(program: List[Operation]):Array[Int] = {
         for (op: Operation <- program) {
             runOp(op)
         }
         dataArr
-    }
+  }
 
   def runOp(op: Operation): Unit = op match {
     case AddOperation() => add()

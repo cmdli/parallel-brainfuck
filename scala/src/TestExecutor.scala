@@ -1,7 +1,7 @@
 object TestExecutor {
    def main(args: Array[String]) {
       val parser = new Parser()
-      val executor = new BrainkkakeExecutor()
+      val executor = new Interpreter()
 
       // Prints "#"
       val programOutput:List[Operation] = parser.parse("+++++[>+++++++<-]>.").get
