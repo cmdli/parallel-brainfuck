@@ -4,7 +4,7 @@ object TestExecutor {
 
         // Prints "#"
         var executor = new Interpreter()
-        val programOutput:List[Operation] = parser.parse("+++++[>+++++[>++<-]<-]>.").get
+        val programOutput:List[Operation] = parser.parse("+++++[>+++++[>++<-]<-]>>.").get
         executor.runProgram(programOutput)
         // Prints "Hello World!\n"
         executor = new Interpreter()

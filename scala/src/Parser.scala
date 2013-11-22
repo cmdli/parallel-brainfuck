@@ -16,24 +16,27 @@ case class LoopOperations(ops: List[Operation]) extends Operation() {
 case class UnknownOperation() extends Operation()
 
 class Parser extends RegexParsers {
-    //Skip whitespace in the program
-    override def skipWhitespace = true
 
     //Parse a program string
     def parse(code: String) = parseAll(block, code)
+
+    def program: Parser[List[List[Operation]]] = rep(line)
+
+    def line: Parser[List[Operation]] = block ~ "\n" ^^ {
+        case block ~ "\n" => block
+    }
 
     //Block of code
     def block: Parser[List[Operation]] = rep(loop | char)
 
     //A single char
-    def char: Parser[Operation] = "[^\\[\\]]".r ^^ {
+    def char: Parser[Operation] = ("+" | "-" | "." | "," | ">" | "<") ^^ {
         case "+" => new AddOperation()
         case "-" => new SubOperation()
         case "." => new PrintOperation()
         case "," => new InputOperation()
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
-        case u:String => println("Unknown Operation: " + u); UnknownOperation()
     }
 
     //A loop in the code
