@@ -13,8 +13,8 @@ case class ShiftLeftOperation() extends Operation()
 case class LoopOperations(ops: List[Operation]) extends Operation() {
     def operations = ops
 }
-case class UnknownOperation() extends Operation()
 case class ForkOperation() extends Operation()
+case class InvalidOperation() extends Operation()
 
 class Parser extends RegexParsers {
 
@@ -39,6 +39,7 @@ class Parser extends RegexParsers {
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
         case "f" => new ForkOperation()
+        case _ => new InvalidOperation()
     }
 
     //A loop in the code

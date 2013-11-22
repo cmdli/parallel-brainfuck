@@ -46,6 +46,7 @@ class Interpreter {
             case ShiftLeftOperation() => shiftLeft()
             case LoopOperations(operations) => loop(operations)
             case ForkOperation() => fork()
+            case InvalidOperation() => ()
         }
 
         def add() = dataArr(dataPointer).incrementAndGet
