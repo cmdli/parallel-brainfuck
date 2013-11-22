@@ -29,7 +29,6 @@ class Interpreter {
         case ShiftRightOperation() => shiftRight()
         case ShiftLeftOperation() => shiftLeft()
         case LoopOperations(operations) => loop(operations)
-        case UnknownOperation(u:String) => unknownOp(u)
     }
 
     def add() = dataArr(dataPointer).incrementAndGet
@@ -43,8 +42,6 @@ class Interpreter {
     def shiftRight() = dataPointer += 1
 
     def shiftLeft() = dataPointer -= 1
-
-    def unknownOp(u:String) = println("Unknown Operation: " + u)
 
     //Run a loop by running the code inside of it while data is zero
     def loop(loopOperations: List[Operation]) = {
