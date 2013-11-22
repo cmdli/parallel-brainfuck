@@ -73,6 +73,7 @@ class Interpreter {
         def fork() {
             var t = new Thread(new Process(program, index+1))
             t.start()
+            children = t :: children
         }
     }
 
