@@ -11,26 +11,34 @@ case class InputOperation() extends Operation()
 case class ShiftRightOperation() extends Operation()
 case class ShiftLeftOperation() extends Operation()
 case class LoopOperations(ops: List[Operation]) extends Operation() {
-  def operations = ops
+    def operations = ops
 }
 case class UnknownOperation() extends Operation()
 
 class Parser extends RegexParsers {
-     def parse(code: String) = parseAll(parser(), code)
+    //Skip whitespace in the program
+    override def skipWhitespace = true
 
-     def parser(): Parser[List[Operation]] = rep(parseLoop | char)
+    //Parse a program string
+    def parse(code: String) = parseAll(block, code)
 
-     def char: Parser[Operation] = ("+" | "-" | "." | ","| ">" | "<") ^^ {
-       case "+" => new AddOperation()
-       case "-" => new SubOperation()
-       case "." => new PrintOperation()
-       case "," => new InputOperation()
-       case ">" => new ShiftRightOperation()
-       case "<" => new ShiftLeftOperation()
-     }
+    //Block of code
+    def block: Parser[List[Operation]] = rep(loop | char)
 
-     // TODO: Make sure this works on nested loops
-     def parseLoop(): Parser[Operation] = ("[" ~ rep(char) ~ "]") ^^ {
-       case "[" ~ operations ~ "]" => new LoopOperations(operations)
-     }
+    //A single char
+    def char: Parser[Operation] = ".".r ^^ {
+        case "+" => new AddOperation()
+        case "-" => new SubOperation()
+        case "." => new PrintOperation()
+        case "," => new InputOperation()
+        case ">" => new ShiftRightOperation()
+        case "<" => new ShiftLeftOperation()
+        case _ => new UnknownOperation()
+    }
+
+    //A loop in the code
+    //Parsed by parsing the code inside the loop
+    def loop: Parser[Operation] = ("[" ~ block ~ "]") ^^ {
+        case "[" ~ operations ~ "]" => new LoopOperations(operations)
+    }
 }
