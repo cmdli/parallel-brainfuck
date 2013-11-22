@@ -15,10 +15,10 @@ class Interpreter {
     // Program starts in the middle of the "infinite" array
     var dataPointer = sizeOfData/2
 
-    var globalTime:Int = 0
+    @volatile var globalTime:Int = 0
 
     def runProgram(program: List[List[Operation]]): Array[AtomicInteger] = {
-        var t = new Thread(new Process(program, 0))
+        val t = new Thread(new Process(program, 0))
         t.start()
         t.join()
         dataArr
@@ -30,12 +30,17 @@ class Interpreter {
         var children: List[Thread] = null
         var localTime:Int = globalTime
 
-        def pause() = while(localTime == globalTime)();
+        def pause() {
+            var i:Int = globalTime
+            while(localTime == i)
+                i = globalTime
+        }
 
         def run() {
             while(index < program.length) {
                 pause()
                 runOp(program(line)(index))
+                index += 1
             }
             if(children != null) {
                 for(child: Thread <- children)
@@ -52,6 +57,8 @@ class Interpreter {
             case ShiftRightOperation() => shiftRight()
             case ShiftLeftOperation() => shiftLeft()
             case LoopOperations(operations) => loop(operations)
+            case StartLoopOperation(i:Int) => maybeJumpForward(i)
+            case EndLoopOperation(i:Int) => maybeJumpBack(i)
             case ForkOperation() => fork()
             case InvalidOperation() => ()
         }
@@ -67,6 +74,10 @@ class Interpreter {
         def shiftRight() = dataPointer += 1
 
         def shiftLeft() = dataPointer -= 1
+
+        def maybeJumpBack(jump:Int) = if(dataArr(dataPointer).get != 0) index -= jump
+
+        def maybeJumpForward(jump:Int) = if(dataArr(dataPointer).get == 0) index += jump
 
         //Run a loop by running the code inside of it while data is zero
         def loop(loopOperations: List[Operation]) = {

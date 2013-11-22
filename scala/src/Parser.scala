@@ -2,7 +2,6 @@
  * Parses a program in BK
  */
 import scala.util.parsing.combinator._
-import scala.collection.immutable.LinearSeq
 
 abstract class Operation()
 case class AddOperation() extends Operation()
@@ -36,61 +35,31 @@ class Parser extends RegexParsers {
     }
 
     //Block of code
-    def block: Parser[List[Operation]] = {
-        println("Parsing block...")
-        (loop | char).*
+    def block: Parser[List[Operation]] =  (loop.* | char.*) ^^ {
+        case l:List[List[Operation]] => l.flatten
+        case c:List[Operation] => c
     }
 
     //A single char
-    def char: Parser[Operation] = {
-        println("Parsing character...")
-        ("+" | "-" | "." | "," | ">" | "<" | "f") ^^ {
-            case "+" => {
-                println("Creating new +...")
-                new AddOperation()
-            }
-            case "-" => {
-                println("Creating new -...")
-                new SubOperation()
-                }
-            case "." => {
-                println("Creating new '.'...")
-                new PrintOperation()
-                    }
-            case "," => {
-                println("Creating new ','...")
-                new InputOperation()
-                        }
-            case ">" => {
-                println("Creating new >...")
-                new ShiftRightOperation()
-                            }
-            case "<" => {
-                println("Creating new <...")
-                new ShiftLeftOperation()
-                                }
-            case "f" => {
-                println("Creating new f...")
-                new ForkOperation()
-            }
-            case _ => {
-                println("Creating new InvalidOperation...")
-                new InvalidOperation()
-            }
-        }
+    def char: Parser[Operation] = ("+" | "-" | "." | "," | ">" | "<" | "f") ^^ {
+        case "+" => new AddOperation()
+        case "-" => new SubOperation()
+        case "." => new PrintOperation()
+        case "," => new InputOperation()
+        case ">" => new ShiftRightOperation()
+        case "<" => new ShiftLeftOperation()
+        case "f" => new ForkOperation()
+        case _ => new InvalidOperation()
     }
 
     //A loop in the code
     //Parsed by parsing the code inside the loop
-    def loop: Parser[List[Operation]] = {
-        println("Parsing loop...")
-        "[" ~ block ~ "]" ^^ {
-            case "[" ~ operations ~ "]" => {
-                var ops = operations.asInstanceOf[List[Operation]]
-                var start = new StartLoopOperation(ops.length)
-                var end = new EndLoopOperation(ops.length)
-                (start :: ops) :+ end
-            }
+    def loop: Parser[List[Operation]] = "[" ~ block ~ "]" ^^ {
+        case "[" ~ operations ~ "]" => {
+            val ops = operations.asInstanceOf[List[Operation]]
+            val start = new StartLoopOperation(ops.length+1)
+            val end = new EndLoopOperation(ops.length+1)
+            (start :: ops) :+ end
         }
     }
 }
