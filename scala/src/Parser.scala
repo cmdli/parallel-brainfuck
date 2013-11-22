@@ -2,6 +2,7 @@
  * Parses a program in BK
  */
 import scala.util.parsing.combinator._
+import scala.collection.immutable.LinearSeq
 
 abstract class Operation()
 case class AddOperation() extends Operation()
@@ -21,30 +22,71 @@ class Parser extends RegexParsers {
     //Parse a program string
     def parse(code: String) = parseAll(program, code)
 
-    def program: Parser[List[List[Operation]]] = rep(line)
+    def program: Parser[List[List[Operation]]] = {
+        rep(line)
+    }
 
-    def line: Parser[List[Operation]] = block ~ "\n" ^^ {
-        case block ~ "\n" => block
+    def line: Parser[List[Operation]] = {
+        println("Parsing line...")
+        (block ~ "\n".?) ^^ {
+            case b:(~[List[Operation],Option[String]]) => b._1
+        }
     }
 
     //Block of code
-    def block: Parser[List[Operation]] = rep(loop | char)
+    def block: Parser[List[Operation]] = {
+        println("Parsing block...")
+        (loop | char).*
+    }
 
     //A single char
-    def char: Parser[Operation] = ("+" | "-" | "." | "," | ">" | "<" | "f") ^^ {
-        case "+" => new AddOperation()
-        case "-" => new SubOperation()
-        case "." => new PrintOperation()
-        case "," => new InputOperation()
-        case ">" => new ShiftRightOperation()
-        case "<" => new ShiftLeftOperation()
-        case "f" => new ForkOperation()
-        case _ => new InvalidOperation()
+    def char: Parser[Operation] = {
+        println("Parsing character...")
+        ("+" | "-" | "." | "," | ">" | "<" | "f") ^^ {
+            case "+" => {
+                println("Creating new +...")
+                new AddOperation()
+            }
+            case "-" => {
+                println("Creating new -...")
+                new SubOperation()
+                }
+            case "." => {
+                println("Creating new '.'...")
+                new PrintOperation()
+                    }
+            case "," => {
+                println("Creating new ','...")
+                new InputOperation()
+                        }
+            case ">" => {
+                println("Creating new >...")
+                new ShiftRightOperation()
+                            }
+            case "<" => {
+                println("Creating new <...")
+                new ShiftLeftOperation()
+                                }
+            case "f" => {
+                println("Creating new f...")
+                new ForkOperation()
+            }
+            case _ => {
+                println("Creating new InvalidOperation...")
+                new InvalidOperation()
+            }
+        }
     }
 
     //A loop in the code
     //Parsed by parsing the code inside the loop
-    def loop: Parser[Operation] = ("[" ~ block ~ "]") ^^ {
-        case "[" ~ operations ~ "]" => new LoopOperations(operations)
+    def loop: Parser[Operation] = {
+        println("Parsing loop...")
+        "[" ~ block ~ "]" ^^ {
+            case "[" ~ operations ~ "]" => {
+                println("Creating new LoopOperations...")
+                new LoopOperations(operations)
+            }
+        }
     }
 }
