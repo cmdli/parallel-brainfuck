@@ -13,7 +13,7 @@ case class ShiftLeftOperation() extends Operation()
 case class LoopOperations(ops: List[Operation]) extends Operation() {
     def operations = ops
 }
-case class UnknownOperation() extends Operation()
+case class InvalidOperation() extends Operation()
 
 class Parser extends RegexParsers {
 
@@ -30,13 +30,14 @@ class Parser extends RegexParsers {
     def block: Parser[List[Operation]] = rep(loop | char)
 
     //A single char
-    def char: Parser[Operation] = ("+" | "-" | "." | "," | ">" | "<") ^^ {
+    def char: Parser[Operation] = "[^\\[\\]]".r ^^ {
         case "+" => new AddOperation()
         case "-" => new SubOperation()
         case "." => new PrintOperation()
         case "," => new InputOperation()
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
+        case _ => new InvalidOperation()
     }
 
     //A loop in the code
