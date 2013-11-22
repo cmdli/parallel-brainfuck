@@ -13,7 +13,7 @@ case class ShiftLeftOperation() extends Operation()
 case class LoopOperations(ops: List[Operation]) extends Operation() {
     def operations = ops
 }
-case class UnknownOperation() extends Operation()
+case class UnknownOperation(x:String) extends Operation()
 
 class Parser extends RegexParsers {
     //Skip whitespace in the program
@@ -33,7 +33,7 @@ class Parser extends RegexParsers {
         case "," => new InputOperation()
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
-        case _ => new UnknownOperation()
+        case u:String => new UnknownOperation(u)
     }
 
     //A loop in the code

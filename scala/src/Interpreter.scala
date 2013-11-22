@@ -29,26 +29,26 @@ class Interpreter {
         case ShiftRightOperation() => shiftRight()
         case ShiftLeftOperation() => shiftLeft()
         case LoopOperations(operations) => loop(operations)
-        case UnknownOperation() => unknownOp()
+        case UnknownOperation(u:String) => unknownOp(u)
     }
 
-    def add() = dataArr(dataPointer).incrementAndGet // += doesnt work here
+    def add() = dataArr(dataPointer).incrementAndGet
 
     def subtract() = dataArr(dataPointer).decrementAndGet
 
     def printData() = print(dataArr(dataPointer).get.toChar)
 
-    def scan() = dataArr(dataPointer).set(Console.in.read.toInt)
+    def scan() = dataArr(dataPointer).set(Console.in.read)
 
     def shiftRight() = dataPointer += 1
 
     def shiftLeft() = dataPointer -= 1
 
-    def unknownOp() = print("Unknown Operation!\n")
+    def unknownOp(u:String) = println("Unknown Operation: " + u)
 
     //Run a loop by running the code inside of it while data is zero
     def loop(loopOperations: List[Operation]) = {
-        while (dataArr(dataPointer) != 0) {
+        while (dataArr(dataPointer).get != 0) {
             for (op: Operation <- loopOperations) {
                 runOp(op)
             }
