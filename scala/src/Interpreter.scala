@@ -13,18 +13,15 @@ class Interpreter {
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
-    // Program starts in the middle of the "infinite" array
-    var dataPointer = sizeOfData/2
-
     def runProgram(program: List[List[Operation]]): Array[AtomicInteger] = {
-        var t = new Thread(new Process(program, 0))
+        var t = new Thread(new Process(program, 0, sizeOfData / 2))
         t.start()
         t.join()
         dataArr
     }
 
-    class Process(program: List[List[Operation]], index: Int) extends Runnable {
-
+    // TODO check dataPointer copied by value
+    class Process(program: List[List[Operation]], index: Int, var dataPointer: Int) extends Runnable {
         var children: List[Thread] = null
 
         def run() {
@@ -72,7 +69,7 @@ class Interpreter {
         }
 
         def fork() {
-            var t = new Thread(new Process(program, index+1))
+            var t = new Thread(new Process(program, index+1, dataPointer))
             t.start()
         }
     }
