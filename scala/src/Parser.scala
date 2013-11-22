@@ -31,7 +31,7 @@ class Parser extends RegexParsers {
     def block: Parser[List[Operation]] = rep(loop | char)
 
     //A single char
-    def char: Parser[Operation] = ("+" | "-" | "." | "," | ">" | "<" | "f") ^^ {
+    def char: Parser[Operation] = "[^\\[\\]]".r ^^ {
         case "+" => new AddOperation()
         case "-" => new SubOperation()
         case "." => new PrintOperation()
