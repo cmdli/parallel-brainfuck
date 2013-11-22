@@ -15,6 +15,8 @@ class Interpreter {
     // Program starts in the middle of the "infinite" array
     var dataPointer = sizeOfData/2
 
+    var globalTime:Int = 0
+
     def runProgram(program: List[List[Operation]]): Array[AtomicInteger] = {
         var t = new Thread(new Process(program, 0))
         t.start()
@@ -22,13 +24,18 @@ class Interpreter {
         dataArr
     }
 
-    class Process(program: List[List[Operation]], index: Int) extends Runnable {
+    class Process(program: List[List[Operation]], line: Int) extends Runnable {
 
+        var index:Int = 0
         var children: List[Thread] = null
+        var localTime:Int = globalTime
+
+        def pause() = while(localTime == globalTime)();
 
         def run() {
-            for (op: Operation <- program(index)) {
-                runOp(op)
+            while(index < program.length) {
+                pause()
+                runOp(program(line)(index))
             }
             if(children != null) {
                 for(child: Thread <- children)

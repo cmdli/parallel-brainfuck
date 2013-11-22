@@ -14,6 +14,8 @@ case class ShiftLeftOperation() extends Operation()
 case class LoopOperations(ops: List[Operation]) extends Operation() {
     def operations = ops
 }
+case class StartLoopOperation(jump:Int) extends Operation()
+case class EndLoopOperation(jump:Int) extends Operation()
 case class ForkOperation() extends Operation()
 case class InvalidOperation() extends Operation()
 
@@ -80,12 +82,14 @@ class Parser extends RegexParsers {
 
     //A loop in the code
     //Parsed by parsing the code inside the loop
-    def loop: Parser[Operation] = {
+    def loop: Parser[List[Operation]] = {
         println("Parsing loop...")
         "[" ~ block ~ "]" ^^ {
             case "[" ~ operations ~ "]" => {
-                println("Creating new LoopOperations...")
-                new LoopOperations(operations)
+                var ops = operations.asInstanceOf[List[Operation]]
+                var start = new StartLoopOperation(ops.length)
+                var end = new EndLoopOperation(ops.length)
+                (start :: ops) :+ end
             }
         }
     }
