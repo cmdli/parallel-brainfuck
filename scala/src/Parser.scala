@@ -23,8 +23,8 @@ class Parser extends RegexParsers {
 
     def program: Parser[List[List[Operation]]] = rep(line)
 
-    def line: Parser[List[Operation]] = block ~ "\n" ^^ {
-        case block ~ "\n" => block
+    def line: Parser[List[Operation]] = (block ~ "\n".?) ^^ {
+        case b:(~[List[Operation],Option[String]]) => b._1
     }
 
     //Block of code
