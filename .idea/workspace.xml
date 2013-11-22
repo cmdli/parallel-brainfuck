@@ -4,14 +4,17 @@
     <list default="true" id="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala/src/Interpreter.scala" afterPath="$PROJECT_DIR$/scala/src/Interpreter.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala/src/Parser.scala" afterPath="$PROJECT_DIR$/scala/src/Parser.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala/src/TestParser.scala" afterPath="$PROJECT_DIR$/scala/src/TestParser.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="brainkkake.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385074560825" ignored="false" />
-    <file path="/Parser.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385077992195" ignored="false" />
+    <file path="/Parser.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385078898891" ignored="false" />
     <file path="/BrainkkakeExecutor.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385074766199" ignored="false" />
-    <file path="/Interpreter.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385078031591" ignored="false" />
+    <file path="/Interpreter.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385079482685" ignored="false" />
     <file path="/a.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385076952273" ignored="false" />
+    <file path="/TestParser.scala" changelist="3ca697cc-1d77-43fb-a37a-6a91a1b76bdf" time="1385079681787" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,10 +75,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Parser.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Parser.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scala/src/Parser.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="27" selection-start="820" selection-end="820" vertical-scroll-proportion="0.0">
+            <state line="28" column="39" selection-start="875" selection-end="875" vertical-scroll-proportion="0.53424656">
               <folding />
             </state>
           </provider>
@@ -84,7 +87,7 @@
       <file leaf-file-name="TestExecutor.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala/src/TestExecutor.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="27" selection-start="183" selection-end="183" vertical-scroll-proportion="0.0">
+            <state line="6" column="25" selection-start="181" selection-end="181" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -93,16 +96,16 @@
       <file leaf-file-name="TestParser.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala/src/TestParser.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="17" selection-start="45" selection-end="45" vertical-scroll-proportion="0.0">
+            <state line="8" column="47" selection-start="208" selection-end="208" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Interpreter.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Interpreter.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala/src/Interpreter.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="45" column="51" selection-start="1262" selection-end="1262" vertical-scroll-proportion="0.84016395">
+            <state line="38" column="43" selection-start="1100" selection-end="1100" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -128,9 +131,9 @@
       <list>
         <option value="$PROJECT_DIR$/scala/src/BrainkkakeExecutor.scala" />
         <option value="$PROJECT_DIR$/scala/src/TestExecutor.scala" />
-        <option value="$PROJECT_DIR$/scala/src/TestParser.scala" />
         <option value="$PROJECT_DIR$/scala/src/Parser.scala" />
         <option value="$PROJECT_DIR$/scala/src/Interpreter.scala" />
+        <option value="$PROJECT_DIR$/scala/src/TestParser.scala" />
       </list>
     </option>
   </component>
@@ -223,6 +226,7 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="options.splitter.main.proportions" value="0.3" />
+    <property name="recentsLimit" value="5" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="options.lastSelected" value="preferences.sourceCode.Scala" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -231,10 +235,49 @@
     <property name="FullScreen" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
+    <property name="dynamic.classpath" value="false" />
     <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.TestParser">
+    <configuration default="false" name="TestParser" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="TestParser" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="scala" />
+      <envs />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method />
+    </configuration>
+    <configuration default="false" name="TestExecutor" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="TestExecutor" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="scala" />
+      <envs />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="" />
+        <option name="TRANSPORT" value="0" />
+        <option name="LOCAL" value="true" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Debug" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method />
+    </configuration>
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m" />
@@ -332,7 +375,16 @@
       <setting name="workingDirectory" value="$PROJECT_DIR$" />
       <method />
     </configuration>
-    <list size="0" />
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="Application.TestParser" />
+      <item index="1" class="java.lang.String" itemvalue="Application.TestExecutor" />
+    </list>
+    <recent_temporary>
+      <list size="2">
+        <item index="0" class="java.lang.String" itemvalue="Application.TestParser" />
+        <item index="1" class="java.lang.String" itemvalue="Application.TestExecutor" />
+      </list>
+    </recent_temporary>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
       <Port>5050</Port>
@@ -372,16 +424,17 @@
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39973614" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298153" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24892086" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24892086" sideWeight="0.6701847" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298153" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -475,30 +528,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scala/src/TestParser.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="17" selection-start="45" selection-end="45" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scala/src/TestExecutor.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="27" selection-start="183" selection-end="183" vertical-scroll-proportion="0.0">
+        <state line="6" column="25" selection-start="181" selection-end="181" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scala/src/Parser.scala">
+    <entry file="file://$PROJECT_DIR$/scala/src/TestParser.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="27" selection-start="820" selection-end="820" vertical-scroll-proportion="0.0">
+        <state line="8" column="47" selection-start="208" selection-end="208" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scala/src/Interpreter.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="45" column="51" selection-start="1262" selection-end="1262" vertical-scroll-proportion="0.84016395">
+        <state line="38" column="43" selection-start="1100" selection-end="1100" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala/src/Parser.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="39" selection-start="875" selection-end="875" vertical-scroll-proportion="0.53424656">
           <folding />
         </state>
       </provider>

@@ -9,5 +9,8 @@ object TestParser extends Parser {
         if (addOperation(0).isInstanceOf[LoopOperations]) {
             println("Success!")
         }
+        else {
+            println("Failure!")
+        }
     }
 }

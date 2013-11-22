@@ -23,10 +23,10 @@ class Parser extends RegexParsers {
     def parse(code: String) = parseAll(block, code)
 
     //Block of code
-    def block: Parser[List[Operation]] = rep(parseLoop | char)
+    def block: Parser[List[Operation]] = rep(loop | char)
 
     //A single char
-    def char: Parser[Operation] = ("+" | "-" | "." | ","| ">" | "<") ^^ {
+    def char: Parser[Operation] = ".".r ^^ {
         case "+" => new AddOperation()
         case "-" => new SubOperation()
         case "." => new PrintOperation()
@@ -38,7 +38,7 @@ class Parser extends RegexParsers {
 
     //A loop in the code
     //Parsed by parsing the code inside the loop
-    def parseLoop(): Parser[Operation] = ("[" ~ block ~ "]") ^^ {
+    def loop: Parser[Operation] = ("[" ~ block ~ "]") ^^ {
         case "[" ~ operations ~ "]" => new LoopOperations(operations)
     }
 }

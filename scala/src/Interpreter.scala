@@ -31,13 +31,13 @@ class Interpreter {
         case UnknownOperation() => unknownOp()
     }
 
-    def add() = dataArr(dataPointer) += 1
+    def add() = dataArr(dataPointer).+(1) // += doesnt work here
 
-    def subtract() = dataArr(dataPointer) -= 1
+    def subtract() = dataArr(dataPointer).-(1)
 
     def printData() = print(dataArr(dataPointer).toChar)
 
-    def scan() = dataArr(dataPointer) = readChar()
+    def scan() = dataArr(dataPointer) = readChar().toByte
 
     def shiftRight() = dataPointer += 1
 
