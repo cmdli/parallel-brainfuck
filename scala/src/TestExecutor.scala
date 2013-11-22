@@ -8,9 +8,9 @@ object TestExecutor {
         executor.runProgram(programOutput)
 
         // Prints input char
-        val programInput:List[Operation] = parser.parse(",.").get
-        println("\nEnter a char: ")
+        val programInput:List[Operation] = parser.parse(",>,<.>.").get
+        print("\nEnter 2 chars: ")
         executor.runProgram(programInput)
-
+        println
     }
 }

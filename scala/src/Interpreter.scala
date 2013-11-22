@@ -38,7 +38,7 @@ class Interpreter {
 
     def printData() = print(dataArr(dataPointer).get.toChar)
 
-    def scan() = dataArr(dataPointer).set(readChar().toInt)
+    def scan() = dataArr(dataPointer).set(Console.in.read.toInt)
 
     def shiftRight() = dataPointer += 1
 
