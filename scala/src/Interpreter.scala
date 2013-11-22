@@ -1,3 +1,4 @@
+import java.util.concurrent.atomic.AtomicInteger
 /**
  * Performs the actions specified by the BK program.
  **/
@@ -7,12 +8,12 @@ class Interpreter {
     val sizeOfData =  1000000
 
     // Makes a zeroed out array.
-    var dataArr = Array.fill[Byte](sizeOfData)(0)
+    var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
     // Program starts in the middle of the "infinite" array
     var dataPointer = sizeOfData/2
 
-    def runProgram(program: List[Operation]):Array[Byte] = {
+    def runProgram(program: List[Operation]):Array[AtomicInteger] = {
         for (op: Operation <- program) {
             runOp(op)
         }
@@ -31,13 +32,13 @@ class Interpreter {
         case UnknownOperation() => unknownOp()
     }
 
-    def add() = dataArr(dataPointer).+(1) // += doesnt work here
+    def add() = dataArr(dataPointer).incrementAndGet // += doesnt work here
 
-    def subtract() = dataArr(dataPointer).-(1)
+    def subtract() = dataArr(dataPointer).decrementAndGet
 
-    def printData() = print(dataArr(dataPointer).toChar)
+    def printData() = print(dataArr(dataPointer).get.toChar)
 
-    def scan() = dataArr(dataPointer) = readChar().toByte
+    def scan() = dataArr(dataPointer).set(readChar().toInt)
 
     def shiftRight() = dataPointer += 1
 
