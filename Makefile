@@ -1,4 +1,6 @@
-DIR=scala/src
-SRC=$(DIR)/Parser.scala $(DIR)/TestExecutor.scala $(DIR)/TestParser.scala
+BINDIR=scala/classes
+SRCDIR=scala/src
+SRC=$(SRCDIR)/*.scala
 all:
-	scalac $(SRC)
+	mkdir -p $(BINDIR)
+	scalac $(SRC) -d $(BINDIR)
