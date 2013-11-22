@@ -4,16 +4,16 @@ object TestExecutor {
 
         // Prints "#"
         var executor = new Interpreter()
-        val programOutput:List[Operation] = parser.parse("+++++[>+++++[>++<-]<-]>>.").get
+        val programOutput: List[List[Operation]] = parser.parse("+++++[>+++++[>++<-]<-]>>.").get
         executor.runProgram(programOutput)
         // Prints "Hello World!\n"
         executor = new Interpreter()
-        val programHello:List[Operation] = parser.parse("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.").get
+        val programHello:List[List[Operation]] = parser.parse("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.").get
         executor.runProgram(programHello)
 
         // Prints input char
         executor = new Interpreter()
-        val programInput:List[Operation] = parser.parse(",>,<.>.").get
+        val programInput:List[List[Operation]] = parser.parse(",>,<.>.").get
         print("\nEnter 2 chars: ")
         executor.runProgram(programInput)
     }

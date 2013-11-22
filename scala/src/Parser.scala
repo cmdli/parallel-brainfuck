@@ -14,11 +14,12 @@ case class LoopOperations(ops: List[Operation]) extends Operation() {
     def operations = ops
 }
 case class UnknownOperation() extends Operation()
+case class ForkOperation() extends Operation()
 
 class Parser extends RegexParsers {
 
     //Parse a program string
-    def parse(code: String) = parseAll(block, code)
+    def parse(code: String) = parseAll(program, code)
 
     def program: Parser[List[List[Operation]]] = rep(line)
 
@@ -30,13 +31,14 @@ class Parser extends RegexParsers {
     def block: Parser[List[Operation]] = rep(loop | char)
 
     //A single char
-    def char: Parser[Operation] = ("+" | "-" | "." | "," | ">" | "<") ^^ {
+    def char: Parser[Operation] = ("+" | "-" | "." | "," | ">" | "<" | "f") ^^ {
         case "+" => new AddOperation()
         case "-" => new SubOperation()
         case "." => new PrintOperation()
         case "," => new InputOperation()
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
+        case "f" => new ForkOperation()
     }
 
     //A loop in the code
