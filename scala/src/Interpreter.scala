@@ -22,16 +22,14 @@ class Interpreter {
 
     // TODO check dataPointer copied by value
     class Process(program: List[List[Operation]], index: Int, var dataPointer: Int) extends Runnable {
-        var children: List[Thread] = null
+        var children: List[Thread] = List[Thread]()
 
         def run() {
             for (op: Operation <- program(index)) {
                 runOp(op)
             }
-            if(children != null) {
-                for(child: Thread <- children)
-                    child.join()
-            }
+            for(child: Thread <- children)
+                child.join()
         }
 
         //Run one operation
@@ -71,11 +69,7 @@ class Interpreter {
         def fork() {
             var t = new Thread(new Process(program, index+1, dataPointer))
             t.start()
+            children ::= t
         }
     }
-
-
-
-
-
 }

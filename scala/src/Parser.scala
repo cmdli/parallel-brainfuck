@@ -18,12 +18,14 @@ case class InvalidOperation() extends Operation()
 
 class Parser extends RegexParsers {
 
+    override def skipWhitespace = false
+    
     //Parse a program string
     def parse(code: String) = parseAll(program, code)
 
-    def program: Parser[List[List[Operation]]] = (line).*
+    def program: Parser[List[List[Operation]]] = rep(line|block)
 
-    def line: Parser[List[Operation]] = (block <~ "\n".?) ^^ {
+    def line: Parser[List[Operation]] = (block <~ "\n") ^^ {
         case b => b
     }
 
@@ -31,7 +33,7 @@ class Parser extends RegexParsers {
     def block: Parser[List[Operation]] = rep1(loop | char)
 
     //A single char
-    def char: Parser[Operation] = "[^\\[\\]]".r ^^ {
+    def char: Parser[Operation] = "[^\\[\\]\\n]".r ^^ {
         case "+" => new AddOperation()
         case "-" => new SubOperation()
         case "." => new PrintOperation()
