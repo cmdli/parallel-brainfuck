@@ -15,12 +15,22 @@ class Interpreter(program: List[List[Operation]]) {
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
+    // for pipe operator
+    var blockArr = {
+        var most = 0
+        for (lineOps: List[Operation] <- program) {
+            most = math.max(lineOps.size,most)
+        }
+        Array.fill[AtomicInteger](most)(new AtomicInteger(0))
+    }
+
     var threads:ArraySeq[LinkedList[Thread]] = new ArraySeq[LinkedList[Thread]](program.length)
 
     var threadLock:Lock = new Lock()
 
     def runProgram(): Array[AtomicInteger] = {
         var first = new Thread(new Process(program, 0, sizeOfData / 2))
+        enter(0,program(0))
         first.start()
         first.join()
         for(lineThreads:LinkedList[Thread] <- threads) {
@@ -31,13 +41,32 @@ class Interpreter(program: List[List[Operation]]) {
         dataArr
     }
 
+    // call this before starting a thread
+    def enter(pc_val:Int = 0, ops:List[Operation]):Int = {
+        var pc_temp:Int = pc_val
+        // TODO can discover these indices at parse time
+        for (op <- ops) {
+            if (op.isInstanceOf[PipeOperation]) {
+                blockArr(pc_temp).incrementAndGet
+            } else {
+                if (op.isInstanceOf[LoopOperations]) {
+                    pc_temp += 1 // [
+                    pc_temp = enter(pc_temp,op.asInstanceOf[LoopOperations].ops)
+                }
+            }
+            pc_temp += 1
+        }
+        pc_temp
+    }
+
     def globalFork(line:Int, dataPointer:Int) {
+        val t = new Thread(new Process(program, line, dataPointer))
         threadLock.acquire()
         if(threads(line) == null)
             threads(line) = new LinkedList[Thread]()
-        threads.update(line, new Thread(new Process(program, line, dataPointer)) +: threads(line))
-        threads(line).head.start()
+        threads.update(line, t +: threads(line))
         threadLock.release()
+        t.start
     }
 
     // TODO check dataPointer copied by value
@@ -62,6 +91,7 @@ class Interpreter(program: List[List[Operation]]) {
             case ShiftLeftOperation() => shiftLeft()
             case LoopOperations(operations) => loop(operations)
             case ForkOperation() => fork()
+            case PipeOperation() => pipe()
             case InvalidOperation() => ()
         }
 
@@ -94,7 +124,10 @@ class Interpreter(program: List[List[Operation]]) {
         }
 
         def pipe() {
-
+            blockArr(pc).decrementAndGet
+            while (blockArr(pc).get > 0) {
+                Thread.`yield`
+            }
         }
     }
 }
