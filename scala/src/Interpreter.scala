@@ -67,6 +67,7 @@ class Interpreter(program: List[List[Operation]]) {
             threads(line) = new LinkedList[Thread]()
         threads.update(line, t +: threads(line))
         threadLock.release()
+        enter(0,program(line))
         t.start
     }
 
@@ -127,7 +128,7 @@ class Interpreter(program: List[List[Operation]]) {
 
         def pipe() {
             blockArr(pc).decrementAndGet
-            while (blockArr(pc).get > 0) {
+            while (blockArr(pc).get != 0) {
                 Thread.`yield`
             }
         }
