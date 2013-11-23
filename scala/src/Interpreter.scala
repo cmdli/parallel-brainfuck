@@ -84,7 +84,7 @@ class Interpreter(program: List[List[Operation]]) {
         }
 
         def fork() {
-            globalFork(line + 1, dataPointer)
+            globalFork(line + dataArr(dataPointer).get, dataPointer)
         }
 
         def pipe() {

@@ -19,7 +19,7 @@ object TestExecutor {
         executor.runProgram()
         println()
         // Verify copy by value
-        val programPara:List[List[Operation]] = parser.parse(",>,<f>...\n....\n").get
+        val programPara:List[List[Operation]] = parser.parse("+>,>,<<f>....\n>>....\n").get
         executor = new Interpreter(programPara)
         print("\nEnter 2 chars: ")
         executor.runProgram()
