@@ -1,6 +1,8 @@
 
 import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.Lock
+import scala.collection.mutable.LinkedList
+import scala.collection.mutable.ArraySeq
 
 /**
  * Performs the actions specified by the BK program.
@@ -13,33 +15,37 @@ class Interpreter(program: List[List[Operation]]) {
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
-    var threads:List[List[Operation]] = List[List[Thread]]()
+    var threads:ArraySeq[LinkedList[Thread]] = new ArraySeq[LinkedList[Thread]](program.length)
 
     var threadLock:Lock = new Lock()
 
     def runProgram(): Array[AtomicInteger] = {
-        var t = new Thread(new Process(program, 0, sizeOfData / 2))
-        t.start()
-        t.join()
+        var first = new Thread(new Process(program, 0, sizeOfData / 2))
+        first.start()
+        first.join()
+        for(lineThreads:LinkedList[Thread] <- threads) {
+            for(t:Thread <- lineThreads) {
+                t.join()
+            }
+        }
         dataArr
     }
 
-    def fork(line:Int) {
+    def globalFork(line:Int, dataPointer:Int) {
         threadLock.acquire()
-        threads(line) = new Thread(new Process(program, line, dataPointer))
+        if(threads(line) == null)
+            threads(line) = new LinkedList[Thread]()
+        threads(line) = new Thread(new Process(program, line, dataPointer)) +: threads(line)
         threadLock.release()
     }
 
     // TODO check dataPointer copied by value
-    class Process(program: List[List[Operation]], index: Int, var dataPointer: Int) extends Runnable {
-        var children: List[Thread] = List[Thread]()
+    class Process(program: List[List[Operation]], line: Int, var dataPointer: Int) extends Runnable {
 
         def run() {
-            for (op: Operation <- program(index)) {
+            for (op: Operation <- program(line)) {
                 runOp(op)
             }
-            for(child: Thread <- children)
-                child.join()
         }
 
         //Run one operation
@@ -77,9 +83,7 @@ class Interpreter(program: List[List[Operation]]) {
         }
 
         def fork() {
-            var t = new Thread(new Process(program, index+1, dataPointer))
-            t.start()
-            children ::= t
+            globalFork(line + 1, dataPointer)
         }
 
         def pipe() {
