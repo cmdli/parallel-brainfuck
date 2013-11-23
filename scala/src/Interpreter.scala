@@ -34,8 +34,10 @@ class Interpreter(program: List[List[Operation]]) {
         first.start()
         first.join()
         for(lineThreads:LinkedList[Thread] <- threads) {
-            for(t:Thread <- lineThreads) {
-                t.join()
+            if (lineThreads != null) {
+                for(t:Thread <- lineThreads) {
+                    t.join()
+                }
             }
         }
         dataArr
