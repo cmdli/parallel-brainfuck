@@ -41,8 +41,8 @@ class Interpreter(program: List[List[Operation]]) {
         dataArr
     }
 
-    // call this before starting a thread
-    def enter(pc_val:Int = 0, ops:List[Operation]):Int = {
+    // call this before starting a thread, entering a loop
+    def enter(pc_val:Int = 0, ops:List[Operation]) {
         var pc_temp:Int = pc_val
         // TODO can discover these indices at parse time
         for (op <- ops) {
@@ -50,13 +50,14 @@ class Interpreter(program: List[List[Operation]]) {
                 blockArr(pc_temp).incrementAndGet
             } else {
                 if (op.isInstanceOf[LoopOperations]) {
+                    // loops are entered in the loop
                     pc_temp += 1 // [
-                    pc_temp = enter(pc_temp,op.asInstanceOf[LoopOperations].ops)
+                    pc_temp += op.asInstanceOf[LoopOperations].ops.size // stuff inside
+                    // ] is done below
                 }
             }
             pc_temp += 1
         }
-        pc_temp
     }
 
     def globalFork(line:Int, dataPointer:Int) {
@@ -110,6 +111,7 @@ class Interpreter(program: List[List[Operation]]) {
         //Run a loop by running the code inside of it while data is zero
         def loop(loopOperations: List[Operation]) = {
             while (dataArr(dataPointer).get != 0) {
+                enter(pc, loopOperations)
                 for (op: Operation <- loopOperations) {
                     runOp(op)
                     pc += 1
