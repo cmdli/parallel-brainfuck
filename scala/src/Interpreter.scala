@@ -35,7 +35,7 @@ class Interpreter(program: List[List[Operation]]) {
         threadLock.acquire()
         if(threads(line) == null)
             threads(line) = new LinkedList[Thread]()
-        threads(line) = new Thread(new Process(program, line, dataPointer)) +: threads(line)
+        threads.update(line, new Thread(new Process(program, line, dataPointer)) +: threads(line))
         threadLock.release()
     }
 
