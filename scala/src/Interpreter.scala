@@ -13,6 +13,8 @@ class Interpreter(program: List[List[Operation]]) {
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
+    var threads:List[List[Operation]] = List[List[Thread]]()
+
     var threadLock:Lock = new Lock()
 
     def runProgram(): Array[AtomicInteger] = {
@@ -23,9 +25,9 @@ class Interpreter(program: List[List[Operation]]) {
     }
 
     def fork(line:Int) {
-        //threadLock.acquire()
-        //threads(line) = new Thread(new Process(program, line, dataPointer))
-
+        threadLock.acquire()
+        threads(line) = new Thread(new Process(program, line, dataPointer))
+        threadLock.release()
     }
 
     // TODO check dataPointer copied by value

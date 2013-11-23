@@ -13,7 +13,7 @@ object TestExecutor {
         executor.runProgram()
 
         // Verify input
-        val programInput:List[List[Operation]] = parser.parse(",>,<.>.").ge
+        val programInput:List[List[Operation]] = parser.parse(",>,<.>.").get
         executor = new Interpreter(programInput)
         print("\nEnter 2 chars: ")
         executor.runProgram()
