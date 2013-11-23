@@ -1,11 +1,11 @@
 
 import java.util.concurrent.atomic.AtomicInteger
-import scala.actors.Actor
+import scala.concurrent.Lock
 
 /**
  * Performs the actions specified by the BK program.
  **/
-class Interpreter {
+class Interpreter(program: List[List[Operation]]) {
 
     // Should be big enough
     val sizeOfData =  1000000
@@ -13,11 +13,19 @@ class Interpreter {
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
-    def runProgram(program: List[List[Operation]]): Array[AtomicInteger] = {
+    var threadLock:Lock = new Lock()
+
+    def runProgram(): Array[AtomicInteger] = {
         var t = new Thread(new Process(program, 0, sizeOfData / 2))
         t.start()
         t.join()
         dataArr
+    }
+
+    def fork(line:Int) {
+        //threadLock.acquire()
+        //threads(line) = new Thread(new Process(program, line, dataPointer))
+
     }
 
     // TODO check dataPointer copied by value
@@ -70,6 +78,10 @@ class Interpreter {
             var t = new Thread(new Process(program, index+1, dataPointer))
             t.start()
             children ::= t
+        }
+
+        def pipe() {
+
         }
     }
 }

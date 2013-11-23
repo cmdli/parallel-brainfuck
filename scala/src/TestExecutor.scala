@@ -4,25 +4,25 @@ object TestExecutor {
         val parser = new Parser()
 
         // Prints "2"
-        var executor = new Interpreter()
         val programOutput: List[List[Operation]] = parser.parse("+++++[>+++++[>++<-]<-]>>.").get
-        executor.runProgram(programOutput)
+        var executor = new Interpreter(programOutput)
+        executor.runProgram()
         // Prints "Hello World!\n"
-        executor = new Interpreter()
         val programHello:List[List[Operation]] = parser.parse("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.").get
-        executor.runProgram(programHello)
+        executor = new Interpreter(programHello)
+        executor.runProgram()
 
         // Verify input
-        executor = new Interpreter()
-        val programInput:List[List[Operation]] = parser.parse(",>,<.>.").get
+        val programInput:List[List[Operation]] = parser.parse(",>,<.>.").ge
+        executor = new Interpreter(programInput)
         print("\nEnter 2 chars: ")
-        executor.runProgram(programInput)
+        executor.runProgram()
         println()
         // Verify copy by value
-        executor = new Interpreter()
         val programPara:List[List[Operation]] = parser.parse(",>,<f>...\n....\n").get
+        executor = new Interpreter(programPara)
         print("\nEnter 2 chars: ")
-        executor.runProgram(programPara)
+        executor.runProgram()
         println()
     }
 }
