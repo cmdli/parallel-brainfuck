@@ -15,7 +15,6 @@ case class LoopOperations(ops: List[Operation]) extends Operation() {
 }
 case class ForkOperation() extends Operation()
 case class InvalidOperation() extends Operation()
-case class PipeOperation() extends Operation()
 
 class Parser extends RegexParsers {
 
@@ -42,7 +41,6 @@ class Parser extends RegexParsers {
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
         case "f" => new ForkOperation()
-        case "|" => new PipeOperation()
         case _ => new InvalidOperation()
     }
 
