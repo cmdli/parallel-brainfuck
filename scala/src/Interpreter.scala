@@ -43,9 +43,12 @@ class Interpreter(program: List[List[Operation]]) {
     // TODO check dataPointer copied by value
     class Process(program: List[List[Operation]], line: Int, var dataPointer: Int) extends Runnable {
 
+        var pc = 0
+
         def run() {
             for (op: Operation <- program(line)) {
                 runOp(op)
+                pc += 1
             }
         }
 
@@ -79,8 +82,11 @@ class Interpreter(program: List[List[Operation]]) {
             while (dataArr(dataPointer).get != 0) {
                 for (op: Operation <- loopOperations) {
                     runOp(op)
+                    pc += 1
                 }
+                pc -= loopOperations.size
             }
+            pc += loopOperations.size
         }
 
         def fork() {
