@@ -21,14 +21,14 @@ class Parser extends RegexParsers {
     //Parse a program string
     def parse(code: String) = parseAll(program, code)
 
-    def program: Parser[List[List[Operation]]] = rep(line)
+    def program: Parser[List[List[Operation]]] = (line).*
 
     def line: Parser[List[Operation]] = (block <~ "\n".?) ^^ {
         case b => b
     }
 
     //Block of code
-    def block: Parser[List[Operation]] = rep(loop | char)
+    def block: Parser[List[Operation]] = rep1(loop | char)
 
     //A single char
     def char: Parser[Operation] = "[^\\[\\]]".r ^^ {
@@ -44,7 +44,7 @@ class Parser extends RegexParsers {
 
     //A loop in the code
     //Parsed by parsing the code inside the loop
-    def loop: Parser[Operation] = ("[" ~> block <~ "]") ^^ {
+    def loop: Parser[Operation] = ("[" ~> rep(loop|char) <~ "]") ^^ {
         case operations => new LoopOperations(operations)
     }
 }
