@@ -20,14 +20,14 @@ object TestExecutor {
         println()
 
         // Verify copy by value
-        val programValue:List[List[Operation]] = parser.parse("+>,>,<<f>....\n>>....").get
+        val programValue:List[List[Operation]] = parser.parse("+>,>,<<*>....\n>>....").get
         executor = new Interpreter(programValue)
         print("\nEnter 2 chars: ")
         executor.runProgram()
         println()
 
         // Verify pi|pe
-        val programPipe:List[List[Operation]] = parser.parse("+>,>,<<f>.|.|.|.\n1234567>>.|.|.|.\n").get
+        val programPipe:List[List[Operation]] = parser.parse("+>,>,<<*>.|.|.|.\n1234567>>.|.|.|.\n").get
         executor = new Interpreter(programPipe)
         print("\nEnter 2 chars: ")
         executor.runProgram()

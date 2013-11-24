@@ -41,7 +41,7 @@ class Parser extends RegexParsers {
         case "," => new InputOperation()
         case ">" => new ShiftRightOperation()
         case "<" => new ShiftLeftOperation()
-        case "f" => new ForkOperation()
+        case "*" => new ForkOperation()
         case "|" => new PipeOperation()
         case _ => new InvalidOperation()
     }
