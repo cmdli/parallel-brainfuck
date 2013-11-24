@@ -33,5 +33,18 @@ object TestExecutor {
         executor.runProgram()
         println()
 
+		// Print "ABCDEF" without threads
+ 		val programPrintSequence:List[List[Operation]] = parser.parse("+++++[>+++++++++++++<-]>-<++++++[>+.<-]").get
+        executor = new Interpreter(new Program(programPrintSequence))
+        print("\nEnter 2 chars: ")
+        executor.runProgram()
+        println()
+
+		// Prints "ABCDEF" using threads and syncing between threads within a loop
+		val programLoopSync:List[List[Operation]] = parser.parse("+*++++[>+++++++++++++<-]>-<++++++|[>+|m<-]\n012345678901234567890123456789012|[>m|,<-]").get
+		executor = new Interpreter(new Program(programLoopSync))
+		//executor.runProgram()
+		println()
+
     }
 }
