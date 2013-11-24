@@ -4,13 +4,10 @@
 
 object TestParser extends Parser {
     def main(args: Array[String]) {
-        val addOperation:List[List[Operation]] = parse("[+[]+]").get
+        val ops:List[List[Operation]] = parse("[+[-]|+|][]\n0[23]|6||*f").get
+        val program: Program = new Program(ops)
 
-        if (addOperation(0)(0).isInstanceOf[LoopOperations]) {
-            println("Success!")
-        }
-        else {
-            println("Failure!")
-        }
+        println(program.calculateOperations())
+        println(program.calculateBlockMap())
     }
 }
