@@ -113,6 +113,7 @@ class Interpreter(program: List[List[Operation]]) {
 
         //Run a loop by running the code inside of it while data is zero
         def loop(loopOperations: List[Operation]) = {
+            pc += 1 // [
             while (dataArr(dataPointer).get != 0) {
                 enter(pc, loopOperations)
                 for (op: Operation <- loopOperations) {
