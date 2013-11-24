@@ -26,7 +26,7 @@ object TestExecutor {
         executor.runProgram()
         println()
 
-        // Verify pi|pe
+        // Verify pipe
         val programPipe:List[List[Operation]] = parser.parse("+>,>,<<*>.|.|.|.\n1234567>>.|.|.|.\n").get
         executor = new Interpreter(new Program(programPipe))
         print("\nEnter 2 chars: ")
