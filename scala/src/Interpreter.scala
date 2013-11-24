@@ -116,9 +116,13 @@ class Interpreter(program: List[List[Operation]]) {
             pc += 1 // [
             while (dataArr(dataPointer).get != 0) {
                 enter(pc, loopOperations)
-                for (op: Operation <- loopOperations) {
-                    runOp(op)
-                    pc += 1
+                if (loopOperations.size != 0) {
+                    for (op: Operation <- loopOperations) {
+                        runOp(op)
+                        pc += 1
+                    }
+                } else {
+                    Thread.`yield`
                 }
                 pc -= loopOperations.size
             }
