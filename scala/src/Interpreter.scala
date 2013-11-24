@@ -1,21 +1,24 @@
-
 import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.Lock
 import scala.collection.mutable.LinkedList
+import scala.collection.mutable.MutableList
 import scala.collection.mutable.ArraySeq
+import scala.collection.immutable.HashMap
 
 /**
  * Performs the actions specified by the BK program.
  **/
 class Interpreter(program: List[List[Operation]]) {
-
     // Should be big enough
     val sizeOfData =  1000000
-
+    
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
-
+    
     // for pipe operator
+    // column -> line numbers
+    var blockMap:Map[Int,LinkedList[Int]] = new HashMap[Int,LinkedList[Int]]
+    
     var blockArr = {
         var most = 0
         for (lineOps: List[Operation] <- program) {
@@ -30,7 +33,7 @@ class Interpreter(program: List[List[Operation]]) {
 
     def runProgram(): Array[AtomicInteger] = {
         var first = new Thread(new Process(program, 0, sizeOfData / 2))
-        enter(0,program(0))
+        program.indices.foreach(i => init(i, ops=program(i)))
         first.start()
         first.join()
         for(lineThreads:LinkedList[Thread] <- threads) {
@@ -42,24 +45,30 @@ class Interpreter(program: List[List[Operation]]) {
         }
         dataArr
     }
-
-    // call this before starting a thread, entering a loop
-    def enter(pc_val:Int = 0, ops:List[Operation]) {
+    
+    // call this before running the code on all lines
+    def init(line_number:Int = 0, pc_val:Int = 0, ops:List[Operation]):Int = {
         var pc_temp:Int = pc_val
-        // TODO can discover these indices at parse time
         for (op <- ops) {
             if (op.isInstanceOf[PipeOperation]) {
-                blockArr(pc_temp).incrementAndGet
+                // blockArr(pc_temp).incrementAndGet
+                // 
+                var set:LinkedList[Int] = blockMap get pc_temp match {
+                    case Some(b) => b
+                    case None => new LinkedList[Int]
+                }
+                blockMap = blockMap.updated(pc_temp, line_number +: set)
             } else {
                 if (op.isInstanceOf[LoopOperations]) {
                     // loops are entered in the loop
                     pc_temp += 1 // [
-                    pc_temp += op.asInstanceOf[LoopOperations].ops.size // stuff inside
+                    pc_temp += init(line_number, pc_temp,op.asInstanceOf[LoopOperations].ops)
                     // ] is done below
                 }
             }
             pc_temp += 1
         }
+        pc_temp
     }
 
     def globalFork(line:Int, dataPointer:Int) {
@@ -69,11 +78,9 @@ class Interpreter(program: List[List[Operation]]) {
             threads(line) = new LinkedList[Thread]()
         threads.update(line, t +: threads(line))
         threadLock.release()
-        enter(0,program(line))
         t.start
     }
 
-    // TODO check dataPointer copied by value
     class Process(program: List[List[Operation]], line: Int, var dataPointer: Int) extends Runnable {
 
         var pc = 0
@@ -115,7 +122,6 @@ class Interpreter(program: List[List[Operation]]) {
         def loop(loopOperations: List[Operation]) = {
             pc += 1 // [
             while (dataArr(dataPointer).get != 0) {
-                enter(pc, loopOperations)
                 if (loopOperations.size != 0) {
                     for (op: Operation <- loopOperations) {
                         runOp(op)
@@ -134,7 +140,7 @@ class Interpreter(program: List[List[Operation]]) {
         }
 
         def pipe() {
-            blockArr(pc).decrementAndGet
+            // TODO
             while (blockArr(pc).get != 0) {
                 Thread.`yield`
             }
