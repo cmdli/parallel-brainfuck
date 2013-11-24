@@ -77,8 +77,8 @@ class Interpreter(program: Program) {
             case InputOperation() => scan()
             case ShiftRightOperation() => shiftRight()
             case ShiftLeftOperation() => shiftLeft()
-            case StartLoopOperation(endPC) => startLoop(endPC)
-            case EndLoopOperation(startPC) => endLoop(startPC)
+            case StartLoopOperation(jump) => startLoop(jump)
+            case EndLoopOperation(jump) => endLoop(jump)
             case ForkOperation() => fork()
             case PipeOperation() => pipe()
             case InvalidOperation() => ()
@@ -97,16 +97,16 @@ class Interpreter(program: Program) {
         def shiftLeft() = dataPointer -= 1
 
         // Jump to the matching end ] if the current data is 0.
-        def startLoop(endPC: Int) = {
+        def startLoop(jump: Int) = {
           if (dataArr(dataPointer).get == 0) {
-            pc = endPC
+            pc += jump
           }
         }
 
         // Return to the matching start [ if the current data is not 0.
-        def endLoop(startPC: Int) {
+        def endLoop(jump: Int) {
           if (dataArr(dataPointer).get != 0) {
-            pc = startPC
+            pc -= jump
           }
         }
 

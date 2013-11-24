@@ -43,19 +43,19 @@ class Program(parsedProgram: List[List[Operation]]) {
     for (op <- line) {
       op match {
         // Stores the StartLoopOp in a stack to be later matched with an EndLoopOp.
-        case op:StartLoopOperation => {
+        /*case op:StartLoopOperation => {
           // Temporarily set endPC to the startOp's PC so that we can retrieve
           // it's value when we match it to the EndLoopOperation.
           op.endPC = pc
           starts.push(op)
-        }
+        }*/
         // Sets the end to point to the start of the loop and vice versa.
-        case op:EndLoopOperation => {
+        /*case op:EndLoopOperation => {
           val start:StartLoopOperation = starts.pop()
           val startPC = start.endPC
           op.startPC = startPC
           start.endPC = pc
-        }
+        } */
         // Updates the block map from PC to the line numbers which have pipes at that pc.
         case op:PipeOperation => {
           val set: mutable.LinkedList[Int] = blockMap.get get pc match {

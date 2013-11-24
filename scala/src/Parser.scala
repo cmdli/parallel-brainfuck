@@ -37,10 +37,13 @@ class Parser extends RegexParsers {
     }
 
     //Block of code
-    def block: Parser[List[Operation]] = rep1(char)
+    def block: Parser[List[Operation]] = rep1(loop | rep1(char)) ^^{
+        case b:List[List[Operation]] => b.flatten
+    }
+
 
     //A single char
-    def char: Parser[Operation] = "[^\\n]".r ^^ {
+    def char: Parser[Operation] = "[^\\[\\]\\n]".r ^^ {
         case "+" => new AddOperation()
         case "-" => new SubOperation()
         case "." => new PrintOperation()
@@ -54,5 +57,10 @@ class Parser extends RegexParsers {
         case "[" => new StartLoopOperation(-1)
         case "]" => new EndLoopOperation(-1)
         case _ => new InvalidOperation()
+    }
+
+    def loop: Parser[List[Operation]] = "[" ~> block <~ "]" ^^  {
+        case ops:List[Operation] =>
+            (StartLoopOperation(ops.length+1) +: ops) :+ EndLoopOperation(ops.length+1)
     }
 }
