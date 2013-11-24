@@ -3,6 +3,8 @@
  */
 
 import scala.util.parsing.combinator._
+import scala.collection.immutable.HashMap
+import scala.collection.mutable.{ArrayBuffer, LinkedList}
 
 abstract class Operation()
 case class AddOperation() extends Operation()
@@ -19,7 +21,9 @@ case class EndLoopOperation(var startPC:Int) extends Operation() {
 }
 case class ForkOperation() extends Operation()
 case class InvalidOperation() extends Operation()
-case class PipeOperation() extends Operation()
+case class PipeOperation() extends Operation() {
+    var list:List[Int] = null
+}
 
 class Parser extends RegexParsers {
 
@@ -28,7 +32,35 @@ class Parser extends RegexParsers {
     override def skipWhitespace = false
     
     //Parse a program string
-    def parse(code: String) = parseAll(program, code)
+    def parse(code: String) = {
+        val parsed = parseAll(program, code)
+        //fixPipes(parsed.get)
+        parsed
+    }
+
+    def fixPipes(program:List[List[Operation]]) {
+        var map:Map[Int, ArrayBuffer[Int]] = new HashMap[Int, ArrayBuffer[Int]]
+        var line:Int = 0
+        while(line < program.length) {
+            var pc:Int = 0
+            while(pc < program(line).length) {
+                if(program(line)(pc).isInstanceOf[PipeOperation]) {
+                    var list:ArrayBuffer[Int] = map.getOrElse(pc, new ArrayBuffer[Int])
+                    list += line
+                }
+                pc += 1
+            }
+            line += 1
+        }
+
+        for(pair <- map) {
+            var pc = pair._1
+            var list:ArrayBuffer[Int] = pair._2
+            val finalList = list.toList
+            for(line <- list)
+                program(line)(pc).asInstanceOf[PipeOperation].list = finalList
+        }
+    }
 
     def program: Parser[List[List[Operation]]] = rep(line|block)
 
