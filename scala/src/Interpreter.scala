@@ -1,42 +1,40 @@
 import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.Lock
-import scala.collection.mutable.LinkedList
-import scala.collection.mutable.MutableList
-import scala.collection.mutable.ArraySeq
-import scala.collection.immutable.HashMap
+import scala.collection.mutable
 
 /**
  * Performs the actions specified by the BK program.
  **/
-class Interpreter(program: List[List[Operation]]) {
+class Interpreter(program: Program) {
     // Should be big enough
     val sizeOfData =  1000000
     
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
-    
+
     // for pipe operator
     // column -> line numbers
-    var blockMap:Map[Int,LinkedList[Int]] = new HashMap[Int,LinkedList[Int]]
-    
+    var blockMap: Map[Int, mutable.LinkedList[Int]] = program.calculateBlockMap()
+
+    var programOps: List[List[Operation]] = program.calculateOperations()
+
     var blockArr = {
         var most = 0
-        for (lineOps: List[Operation] <- program) {
+        for (lineOps: List[Operation] <- programOps) {
             most = math.max(lineOps.size,most)
         }
         Array.fill[AtomicInteger](most)(new AtomicInteger(0))
     }
 
-    var threads:ArraySeq[LinkedList[Thread]] = new ArraySeq[LinkedList[Thread]](program.length)
+    var threads: mutable.ArraySeq[mutable.LinkedList[Thread]] = new mutable.ArraySeq[mutable.LinkedList[Thread]](programOps.length)
 
     var threadLock:Lock = new Lock()
 
     def runProgram(): Array[AtomicInteger] = {
-        var first = new Thread(new Process(program, 0, sizeOfData / 2))
-        program.indices.foreach(i => init(i, ops=program(i)))
+        val first = new Thread(new Process(programOps, 0, sizeOfData / 2))
         first.start()
         first.join()
-        for(lineThreads:LinkedList[Thread] <- threads) {
+        for(lineThreads: mutable.LinkedList[Thread] <- threads) {
             if (lineThreads != null) {
                 for(t:Thread <- lineThreads) {
                     t.join()
@@ -45,62 +43,42 @@ class Interpreter(program: List[List[Operation]]) {
         }
         dataArr
     }
-    
-    // call this before running the code on all lines
-    def init(line_number:Int = 0, pc_val:Int = 0, ops:List[Operation]):Int = {
-        var pc_temp:Int = pc_val
-        for (op <- ops) {
-            if (op.isInstanceOf[PipeOperation]) {
-                // blockArr(pc_temp).incrementAndGet
-                // 
-                var set:LinkedList[Int] = blockMap get pc_temp match {
-                    case Some(b) => b
-                    case None => new LinkedList[Int]
-                }
-                blockMap = blockMap.updated(pc_temp, line_number +: set)
-            } else {
-                if (op.isInstanceOf[LoopOperations]) {
-                    // loops are entered in the loop
-                    pc_temp += 1 // [
-                    pc_temp += init(line_number, pc_temp,op.asInstanceOf[LoopOperations].ops)
-                    // ] is done below
-                }
-            }
-            pc_temp += 1
-        }
-        pc_temp
-    }
 
     def globalFork(line:Int, dataPointer:Int) {
-        val t = new Thread(new Process(program, line, dataPointer))
+        val t = new Thread(new Process(programOps, line, dataPointer))
         threadLock.acquire()
         if(threads(line) == null)
-            threads(line) = new LinkedList[Thread]()
+            threads(line) = new mutable.LinkedList[Thread]()
         threads.update(line, t +: threads(line))
         threadLock.release()
-        t.start
+        t.start()
     }
 
-    class Process(program: List[List[Operation]], line: Int, var dataPointer: Int) extends Runnable {
+    class Process(programOps: List[List[Operation]], line: Int, var dataPointer: Int) extends Runnable {
 
         var pc = 0
 
+        val lineOps = programOps(line)
+
         def run() {
-            for (op: Operation <- program(line)) {
-                runOp(op)
+            val maxPC: Int = lineOps.length
+
+            while (pc < maxPC) {
+                runOp()
                 pc += 1
             }
         }
 
-        //Run one operation
-        def runOp(op: Operation): Unit = op match {
+        // Run one operation.
+        def runOp(): Unit = lineOps(pc) match {
             case AddOperation() => add()
             case SubOperation() => subtract()
             case PrintOperation() => printData()
             case InputOperation() => scan()
             case ShiftRightOperation() => shiftRight()
             case ShiftLeftOperation() => shiftLeft()
-            case LoopOperations(operations) => loop(operations)
+            case StartLoopOperation(jump) => startLoop(jump)
+            case EndLoopOperation(jump) => endLoop(jump)
             case ForkOperation() => fork()
             case PipeOperation() => pipe()
             case InvalidOperation() => ()
@@ -118,21 +96,18 @@ class Interpreter(program: List[List[Operation]]) {
 
         def shiftLeft() = dataPointer -= 1
 
-        //Run a loop by running the code inside of it while data is zero
-        def loop(loopOperations: List[Operation]) = {
-            pc += 1 // [
-            while (dataArr(dataPointer).get != 0) {
-                if (loopOperations.size != 0) {
-                    for (op: Operation <- loopOperations) {
-                        runOp(op)
-                        pc += 1
-                    }
-                } else {
-                    Thread.`yield`
-                }
-                pc -= loopOperations.size
-            }
-            pc += loopOperations.size
+        // Jump to the matching end ] if the current data is 0.
+        def startLoop(jump: Int) = {
+          if (dataArr(dataPointer).get == 0) {
+            pc += jump
+          }
+        }
+
+        // Return to the matching start [ if the current data is not 0.
+        def endLoop(jump: Int) {
+          if (dataArr(dataPointer).get != 0) {
+            pc -= jump
+          }
         }
 
         def fork() {
@@ -141,8 +116,9 @@ class Interpreter(program: List[List[Operation]]) {
 
         def pipe() {
             // TODO
-            while (blockArr(pc).get != 0) {
-                Thread.`yield`
+            while (blockArr(pc).get != 0)
+            {
+              Thread.`yield`()
             }
         }
     }
