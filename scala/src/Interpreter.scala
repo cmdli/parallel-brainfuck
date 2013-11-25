@@ -1,3 +1,4 @@
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.Lock
 import scala.collection.mutable
@@ -18,22 +19,50 @@ class Interpreter(program: Program) {
 
     var programOps: List[List[Operation]] = program.calculateOperations()
 
-    var blockArr = {
-        var most = 0
+    class Block(rows:mutable.LinkedList[Int]) {
+        val lock:Lock = new Lock
+        var count:Int = 0
+        var exit = new AtomicBoolean(false)
+        def checkIn() {
+            lock.acquire
+            if (rows.size == 0) {
+                println("PANIC: pipe fault")
+            }
+            val mine = exit
+            count += 1
+            var current = 0
+            for (row <- rows) {
+                current += threads(row).size
+            }
+            if (current == count) {
+                exit = new AtomicBoolean(false)
+                mine.set(true)
+            }
+            lock.release
+            while (!mine.get) {
+                Thread.`yield`
+            }
+        }
+    }
+
+    val blockArr = {
+        var most = 0 // columns
         for (lineOps: List[Operation] <- programOps) {
             most = math.max(lineOps.size,most)
         }
-        Array.fill[AtomicInteger](most)(new AtomicInteger(0))
+        val array:mutable.ArraySeq[Block] = new mutable.ArraySeq[Block](most)
+        for (i <- 0 to (most - 1)) {
+            array(i) = new Block(blockMap.getOrElse(i,new mutable.LinkedList[Int]))
+        }
+        array
     }
 
-    var threads: mutable.ArraySeq[mutable.LinkedList[Thread]] = new mutable.ArraySeq[mutable.LinkedList[Thread]](programOps.length)
+    val threads: Array[mutable.LinkedList[Thread]] = Array.fill[mutable.LinkedList[Thread]](programOps.length)(new mutable.LinkedList[Thread])
 
     val threadLocks: Array[Lock] = Array.fill[Lock](blockArr.size)(new Lock())
 
     def runProgram(): Array[AtomicInteger] = {
-        val first = new Thread(new Process(programOps, 0, sizeOfData / 2))
-        first.start()
-        first.join()
+        globalFork(0, sizeOfData / 2)
         for(lineThreads: mutable.LinkedList[Thread] <- threads) {
             if (lineThreads != null) {
                 for(t:Thread <- lineThreads) {
@@ -47,8 +76,6 @@ class Interpreter(program: Program) {
     def globalFork(line:Int, dataPointer:Int) {
         val t = new Thread(new Process(programOps, line, dataPointer))
         threadLocks(line).acquire()
-        if(threads(line) == null)
-            threads(line) = new mutable.LinkedList[Thread]()
         threads.update(line, t +: threads(line))
         threadLocks(line).release()
         t.start()
@@ -115,10 +142,7 @@ class Interpreter(program: Program) {
         }
 
         def pipe() {
-            // TODO
-            while (blockArr(pc).get != 0) {
-              Thread.`yield`()
-            }
+            blockArr(pc).checkIn
         }
     }
 }
