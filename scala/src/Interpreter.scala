@@ -28,7 +28,7 @@ class Interpreter(program: Program) {
 
     var threads: mutable.ArraySeq[mutable.LinkedList[Thread]] = new mutable.ArraySeq[mutable.LinkedList[Thread]](programOps.length)
 
-    var threadLock:Lock = new Lock()
+    val threadLocks: Array[Lock] = Array.fill[Lock](blockArr.size)(new Lock())
 
     def runProgram(): Array[AtomicInteger] = {
         val first = new Thread(new Process(programOps, 0, sizeOfData / 2))
@@ -46,11 +46,11 @@ class Interpreter(program: Program) {
 
     def globalFork(line:Int, dataPointer:Int) {
         val t = new Thread(new Process(programOps, line, dataPointer))
-        threadLock.acquire()
+        threadLocks(line).acquire()
         if(threads(line) == null)
             threads(line) = new mutable.LinkedList[Thread]()
         threads.update(line, t +: threads(line))
-        threadLock.release()
+        threadLocks(line).release()
         t.start()
     }
 
@@ -116,8 +116,7 @@ class Interpreter(program: Program) {
 
         def pipe() {
             // TODO
-            while (blockArr(pc).get != 0)
-            {
+            while (blockArr(pc).get != 0) {
               Thread.`yield`()
             }
         }
