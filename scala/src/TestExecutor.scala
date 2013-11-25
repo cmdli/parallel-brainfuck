@@ -40,16 +40,17 @@ object TestExecutor {
         println()
 
         // Print "ABCDEF" without threads
-         val programPrintSequence:List[List[Operation]] = parser.parse("+++++[>+++++++++++++<-]>-<++++++[>+.<-]").get
-            executor = new Interpreter(new Program(programPrintSequence))
-            println("\nExpected: ABCDEF")
-            executor.runProgram()
-            println()
+        val programPrintSequence:List[List[Operation]] = parser.parse("+++++[>+++++++++++++<-]>-<++++++[>+.<-]").get
+        executor = new Interpreter(new Program(programPrintSequence))
+        println("\nExpected: ABCDEF")
+        executor.runProgram()
+        println()
 
         // Prints "ABCDEF" using threads and syncing between threads within a loop
-        val programLoopSync:List[List[Operation]] = parser.parse("+*++++[>+++++++++++++<-]>-<++++++|[>+|m<-]\n012345678901234567890123456789012|[>m|,<-]").get
+        val programLoopSync:List[List[Operation]] = parser.parse("+*++++[>+++++++++++++<-]>-<++++++|[>+|m<m|]\n012345678901234567890123456789012|[>m|.<-|]").get
         executor = new Interpreter(new Program(programLoopSync))
-        //executor.runProgram()
+        println("\nExpected: ABCDEF")
+        executor.runProgram()
         println()
 
         // Prints input character 36 times and verifies that we can clone concurrently without error
