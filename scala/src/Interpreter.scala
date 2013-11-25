@@ -36,6 +36,7 @@ class Interpreter(program: Program) {
             }
             if (current == count) {
                 exit = new AtomicBoolean(false)
+                count = 0
                 mine.set(true)
             }
             lock.release
