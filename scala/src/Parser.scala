@@ -34,7 +34,7 @@ class Parser extends RegexParsers {
     //Parse a program string
     def parse(code: String) = {
         val parsed = parseAll(program, code)
-        //fixPipes(parsed.get)
+        fixPipes(parsed.get)
         parsed
     }
 
