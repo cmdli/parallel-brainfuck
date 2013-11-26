@@ -1,7 +1,6 @@
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import scala.concurrent.Lock
-import scala.collection.mutable
+import java.util.concurrent.Phaser
+import scala.actors.Actor
 
 /**
  * Performs the actions specified by the BK program.
@@ -13,87 +12,82 @@ class Interpreter(program: Program) {
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
-    // for pipe operator
-    // column -> line numbers
-    var blockMap: Map[Int, mutable.LinkedList[Int]] = program.calculateBlockMap()
-
     var programOps: List[List[Operation]] = program.calculateOperations()
 
-    class Block(rows:mutable.LinkedList[Int]) {
-        val lock:Lock = new Lock
-        var count:Int = 0
-        var exit = new AtomicBoolean(false)
-        def checkIn() {
-            lock.acquire
-            if (rows.size == 0) {
-                println("PANIC: pipe fault")
-            }
-            val mine = exit
-            count += 1
-            var current = 0
-            for (row <- rows) {
-                current += threads(row).size
-            }
-            if (current == count) {
-                exit = new AtomicBoolean(false)
-                mine.set(true)
-            }
-            lock.release
-            while (!mine.get) {
-                Thread.`yield`
-            }
+    var threadsPerLine: Array[Int] = Array.fill[Int](programOps.size)(0)
+
+    var pipeHandlers: Array[Phaser] = {
+      var most = 0 // columns
+      for (lineOps: List[Operation] <- programOps) {
+        most = math.max(lineOps.size,most)
+      }
+      val array: Array[Phaser] = new Array[Phaser](most)
+      for (i <- 0 to (most - 1)) {
+        array(i) = new Phaser() {
+          override def onAdvance(phase: Int, registeredParties: Int): Boolean = false
         }
+      }
+      array
     }
 
-    val blockArr = {
-        var most = 0 // columns
-        for (lineOps: List[Operation] <- programOps) {
-            most = math.max(lineOps.size,most)
-        }
-        val array:mutable.ArraySeq[Block] = new mutable.ArraySeq[Block](most)
-        for (i <- 0 to (most - 1)) {
-            array(i) = new Block(blockMap.getOrElse(i,new mutable.LinkedList[Int]))
-        }
-        array
+    def runProgram(): Unit = {
+        Controller ! Start(0, sizeOfData / 2)
+        Controller !? Wait
+        Controller ! Finish
     }
 
-    val threads: Array[mutable.LinkedList[Thread]] = Array.fill[mutable.LinkedList[Thread]](programOps.length)(new mutable.LinkedList[Thread])
+    case class Stop(p: Process, line: Int)
+    case class Start(line: Int, dataPointer: Int)
+    case object Wait
+    case object Finish
 
-    val threadLocks: Array[Lock] = Array.fill[Lock](blockArr.size)(new Lock())
+    object Controller extends Actor {
+        var numThreads: Int = 0;
 
-    def runProgram(): Array[AtomicInteger] = {
-        globalFork(0, sizeOfData / 2)
-        for(lineThreads: mutable.LinkedList[Thread] <- threads) {
-            if (lineThreads != null) {
-                for(t:Thread <- lineThreads) {
-                    t.join()
-                }
+        def act {
+          loop {
+            react {
+              case Start(line, dataPointer) => {
+                val process: Process = new Process(programOps, line, dataPointer, this)
+                numThreads += 1
+                threadsPerLine(line) += 1
+                process.start()
+                reply {true}
+              }
+              case Stop(process, line) => {
+                numThreads -= 1
+                threadsPerLine(line) -= 1
+              }
+              case Wait if (numThreads == 0) => reply { true }
+              case Finish => exit()
             }
+          }
         }
-        dataArr
+
+        this.start()
     }
 
-    def globalFork(line:Int, dataPointer:Int) {
-        val t = new Thread(new Process(programOps, line, dataPointer))
-        threadLocks(line).acquire()
-        threads.update(line, t +: threads(line))
-        threadLocks(line).release()
-        t.start()
-    }
+    class Process(programOps: List[List[Operation]], line: Int, var dataPointer: Int, controller: Actor) extends Actor {
 
-    class Process(programOps: List[List[Operation]], line: Int, var dataPointer: Int) extends Runnable {
+        def act = run()
 
         var pc = 0
 
         val lineOps = programOps(line)
 
         def run() {
+            registerPipes()
+
             val maxPC: Int = lineOps.length
 
             while (pc < maxPC) {
                 runOp()
                 pc += 1
             }
+
+            deregisterPipes()
+            controller ! Stop(this, line)
+            exit()
         }
 
         // Run one operation.
@@ -138,11 +132,30 @@ class Interpreter(program: Program) {
         }
 
         def fork() {
-            globalFork(line + dataArr(dataPointer).get, dataPointer)
+            // TODO: Make sure this is blocking
+            controller !? Start(line + dataArr(dataPointer).get, dataPointer)
         }
 
         def pipe() {
-            blockArr(pc).checkIn
+            pipeHandlers(pc).arriveAndAwaitAdvance()
+        }
+
+        def deregisterPipes() = {
+          for (i <- 0 to lineOps.size - 1) {
+            lineOps(i) match {
+              case PipeOperation() => pipeHandlers(i).arriveAndDeregister()
+              case _ => ()
+            }
+          }
+        }
+
+        def registerPipes() = {
+            for (i <- 0 to lineOps.size - 1) {
+              lineOps(i) match {
+                case PipeOperation() => pipeHandlers(i).register()
+                case _ => ()
+              }
+            }
         }
     }
 }

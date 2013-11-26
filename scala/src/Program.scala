@@ -1,6 +1,12 @@
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
 
+/**
+ * Given a parsed program, calculates and stores the final version
+ * of the program and the map from pc to the lines which have a pipe
+ * in that line for the sync operator.
+ * @param parsedProgram
+ */
 class Program(parsedProgram: List[List[Operation]]) {
 
   private var operations: Option[List[List[Operation]]] = None
