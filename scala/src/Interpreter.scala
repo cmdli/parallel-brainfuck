@@ -48,6 +48,8 @@ class Interpreter(program: Program) {
           loop {
             react {
               case Start(line, dataPointer) => {
+                if(line >= programOps.length)
+                    println("Error in fork: starting line " + line + " when max line is " + (programOps.length-1))
                 val process: Process = new Process(programOps, line, dataPointer, this)
                 numThreads += 1
                 threadsPerLine(line) += 1

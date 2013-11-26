@@ -17,6 +17,17 @@ object TestExecutor {
         executor.runProgram()
         println
 
+        val programHelloPara = parser.parse("+* ++++ +++++ [| >+++++ ++    <-]\n" +
+                                            "*             [| >>+++++ +++++<<]\n" +
+                                            "*             [| >>>+++      <<<]\n" +
+                                            "              [| >>>> +     <<<<]+*\n" +
+                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | > . +++ . ----- -. ----- ---. > + . > .\n" +
+                                            "+++++ +++++ +++++                     |.|").get
+        executor = new Interpreter(new Program(programHelloPara))
+        println("\nExpected: Hello World!\\n")
+        executor.runProgram()
+        println
+
         // Verify input/output
         val programInput:List[List[Operation]] = parser.parse(",>,<.>.").get
         executor = new Interpreter(new Program(programInput))
@@ -40,11 +51,11 @@ object TestExecutor {
         println()
 
         // Print "ABCDEF" without threads
-         val programPrintSequence:List[List[Operation]] = parser.parse("+++++[>+++++++++++++<-]>-<++++++[>+.<-]").get
-            executor = new Interpreter(new Program(programPrintSequence))
-            println("\nExpected: ABCDEF")
-            executor.runProgram()
-            println()
+        val programPrintSequence:List[List[Operation]] = parser.parse("+++++[>+++++++++++++<-]>-<++++++[>+.<-]").get
+        executor = new Interpreter(new Program(programPrintSequence))
+        println("\nExpected: ABCDEF")
+        executor.runProgram()
+        println()
 
         // Prints "ABCDEF" using threads and syncing between threads within a loop
         val programLoopSync:List[List[Operation]] = parser.parse("+*++++[>+++++++++++++<-]>-<++++++|[>+|m<-]\n012345678901234567890123456789012|[>m|,<-]").get
