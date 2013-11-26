@@ -53,12 +53,14 @@ class Interpreter(program: Program) {
                 val process: Process = new Process(programOps, line, dataPointer, this)
                 numThreads += 1
                 threadsPerLine(line) += 1
+                process.registerPipes()
                 process.start()
                 reply {true}
               }
               case Stop(process, line) => {
                 numThreads -= 1
                 threadsPerLine(line) -= 1
+                process.deregisterPipes()
               }
               case Wait if (numThreads == 0) => reply { true }
               case Finish => exit()
@@ -78,8 +80,7 @@ class Interpreter(program: Program) {
         val lineOps = programOps(line)
 
         def run() {
-            registerPipes()
-
+            //registerPipes()
             val maxPC: Int = lineOps.length
 
             while (pc < maxPC) {
@@ -87,7 +88,7 @@ class Interpreter(program: Program) {
                 pc += 1
             }
 
-            deregisterPipes()
+            //deregisterPipes()
             controller ! Stop(this, line)
             exit()
         }
