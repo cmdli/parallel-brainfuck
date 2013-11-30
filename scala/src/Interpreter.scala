@@ -5,16 +5,12 @@ import scala.actors.Actor
 /**
  * Performs the actions specified by the BK program.
  **/
-class Interpreter(program: Program) {
+class Interpreter(programOps: List[List[Operation]]) {
     // Should be big enough
     val sizeOfData =  1000000
     
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
-
-    var programOps: List[List[Operation]] = program.calculateOperations()
-
-    var threadsPerLine: Array[Int] = Array.fill[Int](programOps.size)(0)
 
     var pipeHandlers: Array[Phaser] = {
       var most = 0 // columns
@@ -52,14 +48,12 @@ class Interpreter(program: Program) {
                     println("Error in fork: starting line " + line + " when max line is " + (programOps.length-1))
                 val process: Process = new Process(programOps, line, dataPointer, this)
                 numThreads += 1
-                threadsPerLine(line) += 1
                 process.registerPipes()
                 process.start()
                 reply {true}
               }
               case Stop(process, line) => {
                 numThreads -= 1
-                threadsPerLine(line) -= 1
                 process.deregisterPipes()
               }
               case Wait if (numThreads == 0) => reply { true }
@@ -88,7 +82,7 @@ class Interpreter(program: Program) {
                 pc += 1
             }
 
-            //deregisterPipes()
+            // deregisterPipes()
             controller ! Stop(this, line)
             exit()
         }

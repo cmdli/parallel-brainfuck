@@ -21,8 +21,6 @@ case class PipeOperation() extends Operation() {}
 
 class Parser extends RegexParsers {
 
-    var pc = 0
-
     override def skipWhitespace = false
     
     //Parse a program string
@@ -31,7 +29,7 @@ class Parser extends RegexParsers {
     def program: Parser[List[List[Operation]]] = rep(line|block)
 
     def line: Parser[List[Operation]] = (block <~ "\n") ^^ {
-        case b => pc = 0; b
+        case b => b
     }
 
     //Block of code
@@ -50,15 +48,12 @@ class Parser extends RegexParsers {
         case "<" => new ShiftLeftOperation()
         case "*" => new ForkOperation()
         case "|" => new PipeOperation()
-        // The start and end values of loops
-        // will be corrected in Program.finalizeProgram
-        case "[" => new StartLoopOperation(-1)
-        case "]" => new EndLoopOperation(-1)
         case _ => new InvalidOperation()
     }
 
-    def loop: Parser[List[Operation]] = "[" ~> block <~ "]" ^^  {
+    def loop: Parser[List[Operation]] = (("[" ~> block <~ "]") | "[]") ^^  {
         case ops:List[Operation] =>
             (StartLoopOperation(ops.length+1) +: ops) :+ EndLoopOperation(ops.length+1)
+        case "[]" => List(StartLoopOperation(1), EndLoopOperation(1))
     }
 }
