@@ -102,7 +102,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case LetThisRun(lineToRun) => processLine = lineToRun
                     case LetAnyoneRun => anyoneCanRun = true
                     case Step(line:Int) => for(t <- threads(line)) t.step(); reply {true}
-                    case StepAll => for(lineT <- threads) {for(t <- lineT) t.step()}
+                    case StepAll => for(lineT <- threads) {for(t <- lineT) t.step()}; reply{true}
                     case Continue => {
                         var breakpointReached = false
                         while(numThreads > 0 && !breakpointReached) {
@@ -110,9 +110,10 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                             while(line < threads.length) {
                                 val lineT = threads(line)
                                 for(t <- lineT) {
-
                                     t.step()
-                                    if(breakpoints(line).contains(t.pc))
+                                    if(breakpoints.get(line) match {
+                                        case Some(set: HashSet[Int]) => set.contains(t.pc)
+                                        case None => false})
                                         breakpointReached = true
                                 }
                             }
