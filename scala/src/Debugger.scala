@@ -12,12 +12,11 @@ class Debugger {
     val DataPattern = "(data\\s+)([0-9]+)".r
 
     def debug(program:Array[String], interpreter:Interpreter) {
-        var running = true
         interpreter.debug = true
         interpreter.startProgram()
         while(interpreter.getNumThreads() > 0) {
             display(program, interpreter)
-            print("(h for help) >")
+            print("(h for help) > ")
             val command = readLine()
             println()
             control(command,interpreter)
@@ -39,20 +38,35 @@ class Debugger {
     }
 
     def display(program:Array[String], interpreter:Interpreter) {
-        //Display code
+
         var line = 0
         while(line < program.length) {
             val lineString = program(line)
-            //TODO: Handle multiple threads per line (With a list)
-            var pc:Int = interpreter.getPC(line)
-            if(pc < 0)
-                print(line + ": " + lineString)
-            else {
-                print(line + ": " + lineString.substring(0,pc)
-                        + Console.RED + lineString.substring(pc,pc+1)
-                        + Console.RESET + lineString.substring(pc+1))
+
+            println("\nInstances of line " + line + ":")
+
+            if (getNumProcessesOfLine(interpreter, line) == 0) {
+              println("No Instances")
             }
-            println()
+            else {
+              // Label instance information
+              printf("\n%-5s %s", "id", "line code")
+            }
+
+            var instance = 0
+            while (instance < getNumProcessesOfLine(interpreter, line)) {
+              //TODO: Handle multiple threads per line (With a list)
+              val pc:Int = getPC(interpreter, line, instance)
+              if(pc < 0)
+                printf("\n%-5s %s", instance + ":", lineString)
+              else {
+                printf("\n%-5s %s", instance + ":", lineString.substring(0,pc)
+                                                    + Console.RED + lineString.substring(pc,pc+1)
+                                                    + Console.RESET + lineString.substring(pc+1))
+              }
+              println()
+              instance += 1
+            }
             line += 1
         }
         println()
@@ -77,5 +91,23 @@ class Debugger {
         println()
     }
 
+    def getNumProcessesOfLine(interpreter: Interpreter, line: Int) = {
+      val threads = interpreter.getThreads()
+      if (threads == null) println("Null threads!")
+      if (threads(line) == null) println("Null threads(line)!")
+      threads(line).length
+    }
+
+    def getPC(interpreter: Interpreter, line: Int, instanceOfLine: Int): Int = {
+      val threads = interpreter.getThreads()
+      if (threads == null) println("Null threads!")
+      if (threads(line) == null) println("Null threads(line)!")
+      if (threads(line)(instanceOfLine) == null) println("Null threads(line)(process)!")
+      if (threads(line).length > 0) {
+        threads(line)(instanceOfLine).pc
+      }
+      else
+        -1
+    }
 
 }

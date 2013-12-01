@@ -47,19 +47,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     }
     def stopProgram() = Controller ! Finish
     def getData(index: Int): Int = dataArr(index+sizeOfData/2).get()
-    def getPC(line:Int): Int = {
-        if(debugging) {
-            if(threads == null) println("Null threads!")
-            if(threads(line) == null) println("Null threads(line)!")
-            if(threads(line).length > 0) {
-                threads(line)(0).pc
-            }
-            else
-                -1
-        }
-        else
-            -1
-    }
+    def getThreads() = threads
     def step(line:Int) = Controller !? Step(line)
     def continue() = Controller !? Continue
     def stepAll() = Controller !? StepAll
@@ -68,7 +56,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
 
     case class Stop(p: Process, line: Int)
     case class Start(line: Int, dataPointer: Int)
-    case class CanIRun(line: Int)
+    case class CanIRun(line: Int, process: Int) // Process means which instance of the line the requestor is.
     case object LetAnyoneRun
     case class LetThisRun(line: Int)
     case object Wait
@@ -99,14 +87,13 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     }
 
                     // *** START JUST FOR DEBUGGING *** //
-                    case CanIRun(lineOfRequester) => if ((lineOfRequester == processLine) || anyoneCanRun) anyoneCanRun = false; reply {true}
+                    case CanIRun(lineOfRequester, instance) if ((lineOfRequester == processLine) && (processInstance == instance)) => reply {true}
                     case LetThisRun(lineToRun) => processLine = lineToRun
                     case LetAnyoneRun => anyoneCanRun = true
                     case Step(line:Int) => for(t <- threads(line)) t.step(); reply {true}
                     case StepAll => for(lineT <- threads) {for(t <- lineT) t.step()}; reply{true}
                     case Continue => {
                         var breakpointReached = false
-                        var iteration = 0
                         while(numThreads > 0 && !breakpointReached) {
                             var line = 0
                             while(line < threads.length) {
@@ -147,13 +134,20 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     }
 
     var processLine = 0
+    var processInstance = 0
     var anyoneCanRun = false
     var stepping: Boolean = debugging
     // Line -> breakpoints in each line
     var breakpoints: mutable.HashMap[Int, mutable.HashSet[Int]] = new mutable.HashMap[Int, mutable.HashSet[Int]]
 
-
-    class Process(programOps: List[List[Operation]], line: Int, var dataPointer: Int) extends Actor {
+  /**
+   * A thread of the program.
+   * @param programOps All the code for all lines.
+   * @param line Which line of code the process is running.
+   * @param dataPointer
+   * @param instance Which process of the type "line" is it. Only used in debugging.
+   */
+    class Process(programOps: List[List[Operation]], line: Int, var dataPointer: Int, instance: Int = -1) extends Actor {
 
         def act() = run()
 
@@ -166,7 +160,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
 
             while (pc < maxPC) {
                 if (debugging) {
-                    Controller !? CanIRun(line)
+                    Controller !? CanIRun(line, instance)
 
                     if (stepping || isBreakpointAtPC) {
                         debuggingStepper()
@@ -176,7 +170,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                 pc += 1
             }
 
-            // deregisterPipes()
             Controller ! Stop(this, line)
             exit()
         }
@@ -245,7 +238,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case SwitchPattern(_, lineNumber) => {
                         stepping = true
                         Controller ! LetThisRun(lineNumber.toInt)
-                        Controller !? CanIRun(line)
+                        Controller !? CanIRun(line, instance)
                         continueCommandEntered = true
                     }
                     case DataPattern(_, position) => {
