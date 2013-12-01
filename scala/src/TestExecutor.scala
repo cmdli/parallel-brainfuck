@@ -25,15 +25,16 @@ object TestExecutor {
         executor.runProgram()
         println
 
-        val programHelloPara = parser.parse("+*| ++++ +++++ |[ >+++++ ++    <-|]\n" +
-                                            "* |            |[ >>+++++ +++++<<|]\n" +
-                                            "* |            |[ >>>+++      <<<|]\n" +
-                                            "  |            |[ >>>> +     <<<<|]+*\n" +
-                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | > . +++ . ----- -. ----- ---. > + . > .\n").get
-        executor = new Interpreter(programHelloPara, isDebugging)
-        println("\nExpected: Hello World!\\n")
-        executor.runProgram()
-        println
+      val programHelloPara = parser.parse("+*| ++++ +++++ |[ >+++++ ++    <-|]\n" +
+                                          "* |            |[ >>+++++ +++++<<|]\n" +
+                                          "* |            |[ >>>+++      <<<|]\n" +
+                                          "  |            |[ >>>> +     <<<<|]+*\n" +
+                                          "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | > . +++ . ----- -. ----- ---. > + . > .\n" +
+                                          "+++++ +++++ +++++                     |.|\n").get
+      executor = new Interpreter(programHelloPara, isDebugging)
+      println("\nExpected: Hello World!\\n")
+      executor.runProgram()
+      println
 
         // Verify input/output
         val programInput:List[List[Operation]] = parser.parse(",>,<.>.").get
@@ -50,12 +51,12 @@ object TestExecutor {
         executor.runProgram()
         println()
 
-//        // Verify pipe
-//        val programPipe:List[List[Operation]] = parser.parse("+>,>,<<*>.|.|.|.\n1234567>>.|.|.|.\n").get
-//        executor = new Interpreter(programPipe, isDebugging)
-//        println("\nExpected: four adjacent pairs of the same characters")
-//        executor.runProgram()
-//        println()
+        // Verify pipe
+        val programPipe:List[List[Operation]] = parser.parse("+>,>,<<*>.|.|.|.\n1234567>>.|.|.|.\n").get
+        executor = new Interpreter(programPipe, isDebugging)
+        println("\nExpected: four adjacent pairs of the same characters")
+        executor.runProgram()
+        println()
 
         // Print "ABCDEF" without threads
         val programPrintSequence:List[List[Operation]] = parser.parse("+++++[>+++++++++++++<-]>-<++++++[>+.<-]").get

@@ -56,9 +56,13 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                 process.start()
                 reply {true}
               }
+
+              // *** START JUST FOR DEBUGGING *** //
               case CanIRun(lineOfRequester) if ((lineOfRequester == processLine) || anyoneCanRun) => anyoneCanRun = false; reply{true}
               case LetThisRun(lineToRun) => processLine = lineToRun
               case LetAnyoneRun => anyoneCanRun = true
+              // *** END JUST FOR DEBUGGING *** //
+
               case Stop(process, line) => {
                 numThreads -= 1
                 process.deregisterPipes()
@@ -108,7 +112,8 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             exit()
         }
 
-        def isBreakpointAtPC(): Boolean = {
+      // *** START JUST FOR DEBUGGING *** //
+      def isBreakpointAtPC(): Boolean = {
           var breakpointAtPC = false
           breakpoints.get(line) match {
             case Some(set: mutable.HashSet[Int]) => if (set contains pc) breakpointAtPC = true
@@ -180,8 +185,10 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
 
           println()
         }
+      // *** END JUST FOR DEBUGGING *** //
 
-        // Run one operation.
+
+      // Run one operation.
         def runOp(): Unit = lineOps(pc) match {
             case AddOperation() => add()
             case SubOperation() => subtract()
