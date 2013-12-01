@@ -3,8 +3,6 @@
  */
 
 import scala.util.parsing.combinator._
-import scala.collection.immutable.HashMap
-import scala.collection.mutable.{ArrayBuffer}
 
 abstract class Operation()
 case class AddOperation() extends Operation()
@@ -17,7 +15,7 @@ case class StartLoopOperation(var numLoopOps: Int) extends Operation()
 case class EndLoopOperation(var numLoopOps: Int) extends Operation()
 case class ForkOperation() extends Operation()
 case class InvalidOperation() extends Operation()
-case class PipeOperation() extends Operation() {}
+case class PipeOperation() extends Operation()
 
 class Parser extends RegexParsers {
 
