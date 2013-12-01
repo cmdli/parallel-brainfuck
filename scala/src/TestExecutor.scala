@@ -21,8 +21,8 @@ object TestExecutor {
                                             "* |            |[ >>+++++ +++++<<|]\n" +
                                             "* |            |[ >>>+++      <<<|]\n" +
                                             "  |            |[ >>>> +     <<<<|]+*\n" +
-                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | > . +++ . ----- -. ----- ---. > + . > .\n" +
-                                            "+++++ +++++ +++++                     |.|\n").get
+                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | < . +++ . ----- -. ----- ---. > + . > .\n" +
+                                            ">+++++ +++++ +++++                    |.|\n").get
         executor = new Interpreter(new Program(programHelloPara))
         println("\nExpected: Hello World!\\n")
         executor.runProgram()
