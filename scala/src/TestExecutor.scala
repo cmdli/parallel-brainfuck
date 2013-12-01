@@ -19,7 +19,8 @@ object TestExecutor {
         }
 
         // Prints "Hello World!\n"
-        val programHello:List[List[Operation]] = parser.parse("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.").get
+        val programHello:List[List[Operation]] = parser.parse("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++." +
+                                                              ".+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.").get
         executor = new Interpreter(programHello, isDebugging)
         println("\nExpected: Hello World!\\n")
         executor.runProgram()
