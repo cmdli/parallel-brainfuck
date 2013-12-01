@@ -42,8 +42,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     def getData(index: Int): Int = dataArr(index).get()
     def getPC(line:Int): Int = if(debugging) {if(threads(line).length > 0) threads(line)(0).pc else 0} else 0
     def step(line:Int) = Controller !? Step(line)
-
-    def continue() = 1
+    def continue() = Controller !? Continue
 
     case class Stop(p: Process, line: Int)
     case class Start(line: Int, dataPointer: Int)
@@ -53,6 +52,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     case object Wait
     case object Finish
     case class Step(line:Int)
+    case object Continue
 
     object Controller extends Actor {
         var numThreads: Int = 0
@@ -77,6 +77,21 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case LetThisRun(lineToRun) => processLine = lineToRun
                     case LetAnyoneRun => anyoneCanRun = true
                     case Step(line:Int) => for(t <- threads(line)) t.step(); reply {true}
+                    case Continue => {
+                        var breakpointReached = false
+                        while(numThreads > 0 && !breakpointReached) {
+                            var line = 0
+                            while(line < threads.length) {
+                                val lineT = threads(line)
+                                for(t <- lineT) {
+
+                                    t.step()
+                                    if(breakpoints(line).contains(t.pc))
+                                        breakpointReached = true
+                                }
+                            }
+                        }
+                    }
                     // *** END JUST FOR DEBUGGING *** //
 
                     case Stop(process, line) => {
