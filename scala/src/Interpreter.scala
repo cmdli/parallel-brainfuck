@@ -136,9 +136,8 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case Stop(process, line) => {
                         numThreads -= 1
                         process.deregisterPipes()
-                        println("numThreads: " + numThreads)
                     }
-                    case Wait => if (numThreads == 0) reply {true}
+                    case Wait if (numThreads == 0) => reply {true}
                     case Finish => exit()
                 }
             }
