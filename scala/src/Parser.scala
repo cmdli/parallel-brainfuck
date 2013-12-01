@@ -31,7 +31,7 @@ class Parser extends RegexParsers {
     }
 
     //Block of code
-    def block: Parser[List[Operation]] = rep1(loop | rep1(char)) ^^{
+    def block: Parser[List[Operation]] = rep1(loop | rep1(char)) ^^ {
         case b:List[List[Operation]] => b.flatten
     }
 

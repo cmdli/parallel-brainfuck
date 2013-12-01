@@ -2,6 +2,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.Phaser
 import scala.actors.Actor
 import scala.collection.mutable
+import scala.collection.mutable.LinkedList
 
 /**
  * Performs the actions specified by the BK program.
@@ -12,6 +13,9 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
 
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
+
+    //List of currently existing threads (used in debugging)
+    var threads:Array[LinkedList[Process]] = null
 
     var pipeHandlers: Array[Phaser] = {
         var most = 0 // columns
@@ -28,12 +32,18 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     }
 
     def runProgram(): Unit = {
+        if(debugging)
+            threads = Array.fill[LinkedList[Process]](programOps.length)(new LinkedList[Process]())
         Controller ! Start(0, sizeOfData / 2)
         Controller !? Wait
         Controller ! Finish
     }
 
     def getData(index: Int): Int = dataArr(index).get()
+    def getPC(line:Int): Int = if(debugging) {if(threads(line).length > 0) threads(line)(0).pc else 0} else 0
+    def step(line:Int) = Controller !? Step(line)
+
+    def continue() = 1
 
     case class Stop(p: Process, line: Int)
     case class Start(line: Int, dataPointer: Int)
@@ -56,6 +66,8 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                         val process: Process = new Process(programOps, line, dataPointer)
                         numThreads += 1
                         process.registerPipes()
+                        if(debugging)
+                            threads(line) = threads(line) :+ process
                         process.start()
                         reply {true}
                     }
@@ -64,6 +76,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case CanIRun(lineOfRequester) => if ((lineOfRequester == processLine) || anyoneCanRun) anyoneCanRun = false; reply {true}
                     case LetThisRun(lineToRun) => processLine = lineToRun
                     case LetAnyoneRun => anyoneCanRun = true
+                    case Step(line:Int) => for(t <- threads(line)) t.step(); reply {true}
                     // *** END JUST FOR DEBUGGING *** //
 
                     case Stop(process, line) => {
@@ -129,10 +142,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                 case None => ()
             }
             breakpointAtPC
-        }
-
-        def waitAtBreakpoints() {
-
         }
 
         def debuggingStepper() {

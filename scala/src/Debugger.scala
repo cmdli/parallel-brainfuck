@@ -5,7 +5,7 @@ import scala.collection.mutable
  */
 class Debugger {
 
-    /*val StepLinePattern = "([0-9]+)".r
+    val StepLinePattern = "([0-9]+)".r
     val BreakpointPattern1 = "(b\\s+)([0-9]+)".r
     val BreakpointPattern2 = "(b\\s+)([0-9]+)(\\s+)([0-9]+)".r
     val SwitchPattern = "(switch\\s+)([0-9]+)".r
@@ -15,15 +15,15 @@ class Debugger {
 
     def control(instruction:String, interpreter:Interpreter) {
         instruction match {
-            case StepLinePattern(line) => interpreter.step(line) //Step the specified line
+            case StepLinePattern(line) => interpreter.step(line.toInt) //Step the specified line
             case "c" => interpreter.continue() //Continue until a thread hits a breakpoint
             //case BreakpointPattern1(_, pc) => interpreter.addBreakpoint(pc)
-            case BreakpointPattern2(_, pc, _, line) => interpreter.addBreakpoint(pc,line)
+            //case BreakpointPattern2(_, pc, _, line) => interpreter.addBreakpoint(pc,line)
         }
     }
 
-    println("\nCurrent instruction: " + lineOps(pc) + " at pc: " + pc + " in line: " + line)
-    println("What do you want to do? (h for help)")
+    /*println("\nCurrent instruction: " + lineOps(pc) + " at pc: " + pc + " in line: " + line)
+    println("What do you want to do? (h for help)")  */
 
     def display(program:List[String], interpreter:Interpreter) {
         //Display code
@@ -48,7 +48,7 @@ class Debugger {
         for(x <- Range(-10,10)) {
             printf("|%1$4".format(interpreter.getData(x)))
         }
-    }*/
+    }
 
 
 }
