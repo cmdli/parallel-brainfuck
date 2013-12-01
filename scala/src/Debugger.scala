@@ -32,6 +32,7 @@ class Debugger {
             case "c" => println("Continuing...");interpreter.continue() //Continue until a thread hits a breakpoint
             //case BreakpointPattern1(_, pc) => interpreter.addBreakpoint(pc)
             case BreakpointPattern2(pc,line) => println("Breakpoint at (%d,%d)", pc, line); interpreter.addBreakpoint(pc.toInt,line.toInt)
+            case "h" => helpCommands()
         }
     }
 
@@ -62,6 +63,15 @@ class Debugger {
         for(x:Int <- -10 to 10) {
             printf("|%1$4d".format(interpreter.getData(x)))
         }
+        println()
+    }
+
+    def helpCommands() {
+        printf("%-30s%s\n", "s", "step all threads one instruction")
+        printf("%-30s%s\n", "c", "continue execution until breakpoint or completion")
+        printf("%-30s%s\n", "b {pc} {line}", "set breakpoint at specified program counter within the specified line")
+        printf("%-30s%s\n", "{line}", "steps all threads of the specified line type by one instruction")
+
         println()
     }
 
