@@ -1,4 +1,5 @@
 import scala.collection.mutable
+import scala.collection.mutable.HashSet
 
 /**
  * Provides a debugging interface to the interpreter
@@ -15,7 +16,7 @@ class Debugger {
         interpreter.debug = true
         interpreter.startProgram()
         while(interpreter.getNumThreads() > 0) {
-            display(program, interpreter)
+            displayLines(program, interpreter)
             print("(h for help) > ")
             val command = readLine()
             println()
@@ -67,6 +68,42 @@ class Debugger {
               println()
               instance += 1
             }
+            line += 1
+        }
+        println()
+
+        //Display data
+        for(x:Int <- -10 to 10) {
+            printf("|%1$4d".format(x))
+        }
+        println()
+        for(x:Int <- -10 to 10) {
+            printf("|%1$4d".format(interpreter.getData(x)))
+        }
+        println()
+    }
+
+    def displayLines(program:Array[String], interpreter:Interpreter) {
+
+        var line = 0
+        while(line < program.length) {
+            val lineString:String = program(line)
+            //TODO: Handle multiple threads per line (With a list)
+            val pcs:Array[Int] = interpreter.getPCs(line)
+            if(pcs.length == 0)
+                printf(line + ": " + lineString)
+            else {
+                printf(line + ": ")
+                var oldPC = 0
+                for(pc <- pcs) {
+                    printf(lineString.substring(oldPC,pc)
+                            + Console.RED + lineString.substring(pc,pc+1)
+                            + Console.RESET)
+                    oldPC = pc
+                }
+                printf(lineString.substring(oldPC))
+            }
+            println()
             line += 1
         }
         println()

@@ -48,11 +48,48 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     def stopProgram() = Controller ! Finish
     def getData(index: Int): Int = dataArr(index+sizeOfData/2).get()
     def getThreads() = threads
-    def step(line:Int) = Controller !? Step(line)
-    def continue() = Controller !? Continue
-    def stepAll() = Controller !? StepAll
+    def step(line:Int) {
+        for(t <- threads(line))
+            t.step()
+    }
+    def continue() {
+        var breakpointReached = false
+        while(getNumThreads() > 0 && !breakpointReached) {
+            var line = 0
+            while(line < threads.length) {
+                val lineT = threads(line)
+                for(t <- lineT) {
+                    t.step()
+                    if(breakpoints.get(line) match {
+                        case Some(set: HashSet[Int]) => set.contains(t.pc)
+                        case None => false})
+                        breakpointReached = true
+                }
+                line += 1
+            }
+        }
+    }
+    def stepAll() {
+        for(lineT <- threads)
+            for(t <- lineT)
+                t.step()
+    }
     def addBreakpoint(pc:Int, line:Int) = Controller !? Breakpoint(pc,line)
     def getNumThreads():Int = (Controller !? NumThreads).asInstanceOf[Int]
+    def getPCs(line:Int):Array[Int] = {
+        if(debug) {
+            threads(line) match {
+                case t:LinkedList[Process] => {
+                    var b:Array[Int] = new Array[Int](t.size)
+                    for(i <- 0 to (b.length - 1)) b(i) = t(i).pc
+                    b
+                }
+                case null => new Array[Int](0)
+            }
+        }
+        else
+            new Array[Int](0)
+    }
 
     case class Stop(p: Process, line: Int)
     case class Start(line: Int, dataPointer: Int)
@@ -90,29 +127,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case CanIRun(lineOfRequester, instance) if ((lineOfRequester == processLine) && (processInstance == instance)) => reply {true}
                     case LetThisRun(lineToRun) => processLine = lineToRun
                     case LetAnyoneRun => anyoneCanRun = true
-                    case Step(line:Int) => for(t <- threads(line)) t.step(); reply {true}
-                    case StepAll => for(lineT <- threads) {for(t <- lineT) t.step()}; reply{true}
-                    case Continue => {
-                        var breakpointReached = false
-                        while(numThreads > 0 && !breakpointReached) {
-                            var line = 0
-                            while(line < threads.length) {
-                                val lineT = threads(line)
-                                for(t <- lineT) {
-                                    if(!t.step()) {
-                                        numThreads -= 1
-                                        t.deregisterPipes()
-                                    }
-                                    if(breakpoints.get(line) match {
-                                        case Some(set: HashSet[Int]) => set.contains(t.pc)
-                                        case None => false})
-                                        breakpointReached = true
-                                }
-                                line += 1
-                            }
-                        }
-                        reply{true}
-                    }
                     case Breakpoint(pc:Int, line:Int) => breakpoints.get(line) match {
                         case Some(set: HashSet[Int]) => set += pc
                         case None => breakpoints += ((line, HashSet[Int]() += pc))
@@ -123,6 +137,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case Stop(process, line) => {
                         numThreads -= 1
                         process.deregisterPipes()
+                        reply{true}
                     }
                     case Wait if (numThreads == 0) => reply {true}
                     case Finish => exit()
@@ -174,15 +189,23 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             exit()
         }
 
-
-        def step():Boolean = {
-            if(pc < lineOps.length) {
-                runOp()
-                pc += 1
-                true
+        var awaitingPhaser = -1
+        def step() = {
+            if(awaitingPhaser != -1) {
+                if(pipeHandlers(pc).getPhase != awaitingPhaser)
+                    awaitingPhaser = -1
             }
-            else {
-                false
+            if(awaitingPhaser == -1) {
+                if(pc < lineOps.length) {
+                    lineOps(pc) match {
+                    case PipeOperation() => pipeHandlers(pc).arrive(); awaitingPhaser = pipeHandlers(pc).getPhase
+                    case _ => runOp()
+                    }
+                    pc += 1
+                }
+                else {
+                    Controller !? Stop(this,line)
+                }
             }
 
         }
