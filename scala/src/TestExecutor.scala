@@ -17,12 +17,12 @@ object TestExecutor {
         executor.runProgram()
         println
 
-        val programHelloPara = parser.parse("+*| ++++ +++++ |[ >+++++ ++    <-|]\n" +
-                                            "* |            |[ >>+++++ +++++<<|]\n" +
-                                            "* |            |[ >>>+++      <<<|]\n" +
-                                            "  |            |[ >>>> +     <<<<|]+*\n" +
-                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | > . +++ . ----- -. ----- ---. > + . > .\n" +
-                                            "+++++ +++++ +++++                     |.|\n").get
+        val programHelloPara = parser.parse("+*|++++ +++++|[ >+++++ ++    <-|]\n" +
+                                            "* |          |[ >>+++++ +++++<<|]\n" +
+                                            "* |          |[ >>>+++      <<<|]\n" +
+                                            "  |          |[ >>>> +     <<<<|]+*\n" +
+                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | < . +++ . ----- -. ----- ---. > + . > .\n" +
+                                            ">+++++ +++++ +++++                    |.|\n").get
         executor = new Interpreter(programHelloPara)
         println("\nExpected: Hello World!\\n")
         executor.runProgram()
