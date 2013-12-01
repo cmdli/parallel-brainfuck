@@ -3,6 +3,7 @@ import java.util.concurrent.Phaser
 import scala.actors.Actor
 import scala.collection.mutable
 import scala.collection.mutable.LinkedList
+import scala.collection.mutable.HashSet
 
 /**
  * Performs the actions specified by the BK program.
@@ -12,7 +13,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     val sizeOfData = 1000000
 
     // Makes a zeroed out array.
-    var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
+    var dataArr = Array.fill[AtomicInteger](sizeOfData){new AtomicInteger(0)}
 
     //List of currently existing threads (used in debugging)
     var threads:Array[LinkedList[Process]] = null
@@ -33,16 +34,36 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
 
     def runProgram(): Unit = {
         if(debugging)
-            threads = Array.fill[LinkedList[Process]](programOps.length)(new LinkedList[Process]())
+            threads = Array.fill[LinkedList[Process]](programOps.length){new LinkedList[Process]()}
         Controller ! Start(0, sizeOfData / 2)
         Controller !? Wait
         Controller ! Finish
     }
 
-    def getData(index: Int): Int = dataArr(index).get()
-    def getPC(line:Int): Int = if(debugging) {if(threads(line).length > 0) threads(line)(0).pc else 0} else 0
+    def startProgram() {
+        threads = Array.fill[LinkedList[Process]](programOps.length){new LinkedList[Process]()}
+        Controller ! Start(0, sizeOfData/2)
+    }
+    def stopProgram() = Controller ! Finish
+    def getData(index: Int): Int = dataArr(index+sizeOfData/2).get()
+    def getPC(line:Int): Int = {
+        if(debugging) {
+            if(threads == null) println("Null threads!")
+            if(threads(line) == null) println("Null threads(line)!")
+            if(threads(line).length > 0) {
+                threads(line)(0).pc
+            }
+            else
+                -1
+        }
+        else
+            -1
+    }
     def step(line:Int) = Controller !? Step(line)
     def continue() = Controller !? Continue
+    def stepAll() = Controller !? StepAll
+    def addBreakpoint(pc:Int, line:Int) = Controller !? Breakpoint(pc,line)
+    def getNumThreads():Int = (Controller !? NumThreads).asInstanceOf[Int]
 
     case class Stop(p: Process, line: Int)
     case class Start(line: Int, dataPointer: Int)
@@ -52,7 +73,10 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     case object Wait
     case object Finish
     case class Step(line:Int)
+    case object StepAll
     case object Continue
+    case class Breakpoint(pc:Int,line:Int)
+    case object NumThreads
 
     object Controller extends Actor {
         var numThreads: Int = 0
@@ -68,7 +92,8 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                         process.registerPipes()
                         if(debugging)
                             threads(line) = threads(line) :+ process
-                        process.start()
+                        else
+                            process.start()
                         reply {true}
                     }
 
@@ -77,6 +102,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case LetThisRun(lineToRun) => processLine = lineToRun
                     case LetAnyoneRun => anyoneCanRun = true
                     case Step(line:Int) => for(t <- threads(line)) t.step(); reply {true}
+                    case StepAll => for(lineT <- threads) {for(t <- lineT) t.step()}
                     case Continue => {
                         var breakpointReached = false
                         while(numThreads > 0 && !breakpointReached) {
@@ -92,6 +118,11 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                             }
                         }
                     }
+                    case Breakpoint(pc:Int, line:Int) => breakpoints.get(line) match {
+                        case Some(set: HashSet[Int]) => set += pc
+                        case None => breakpoints += ((line, HashSet[Int]() += pc))
+                    }
+                    case NumThreads => reply{numThreads}
                     // *** END JUST FOR DEBUGGING *** //
 
                     case Stop(process, line) => {
@@ -147,6 +178,11 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                 runOp()
                 pc += 1
             }
+            else {
+                Controller ! Stop(this, line)
+                exit()
+            }
+
         }
 
         // *** START JUST FOR DEBUGGING *** //

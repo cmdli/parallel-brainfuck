@@ -7,47 +7,62 @@ class Debugger {
 
     val StepLinePattern = "([0-9]+)".r
     val BreakpointPattern1 = "(b\\s+)([0-9]+)".r
-    val BreakpointPattern2 = "(b\\s+)([0-9]+)(\\s+)([0-9]+)".r
+    val BreakpointPattern2 = "b\\s+([0-9]+)\\s+([0-9]+)".r
     val SwitchPattern = "(switch\\s+)([0-9]+)".r
     val DataPattern = "(data\\s+)([0-9]+)".r
 
+    def debug(program:Array[String], interpreter:Interpreter) {
+        var running = true
+        interpreter.startProgram()
+        while(interpreter.getNumThreads() > 0) {
+            display(program, interpreter)
+            print("(h for help) >")
+            val command = readLine()
+            println()
+            control(command,interpreter)
+        }
+        interpreter.stopProgram()
+    }
 
 
     def control(instruction:String, interpreter:Interpreter) {
         instruction match {
-            case StepLinePattern(line) => interpreter.step(line.toInt) //Step the specified line
-            case "c" => interpreter.continue() //Continue until a thread hits a breakpoint
+            case StepLinePattern(line) => println("Stepping line " + line + "...");interpreter.step(line.toInt) //Step the specified line
+            case "s" => println("Stepping all threads...");interpreter.stepAll()
+            case "c" => println("Continuing...");interpreter.continue() //Continue until a thread hits a breakpoint
             //case BreakpointPattern1(_, pc) => interpreter.addBreakpoint(pc)
-            //case BreakpointPattern2(_, pc, _, line) => interpreter.addBreakpoint(pc,line)
+            case BreakpointPattern2(pc,line) => println("Breakpoint at (%d,%d)", pc, line); interpreter.addBreakpoint(pc.toInt,line.toInt)
         }
     }
 
-    /*println("\nCurrent instruction: " + lineOps(pc) + " at pc: " + pc + " in line: " + line)
-    println("What do you want to do? (h for help)")  */
-
-    def display(program:List[String], interpreter:Interpreter) {
+    def display(program:Array[String], interpreter:Interpreter) {
         //Display code
         var line = 0
         while(line < program.length) {
             val lineString = program(line)
             //TODO: Handle multiple threads per line (With a list)
             var pc:Int = interpreter.getPC(line)
-            print(line + ": " + lineString.substring(0,pc)
-                    + Console.RED + lineString.substring(pc,pc+1)
-                    + Console.RESET + lineString.substring(pc+1))
+            if(pc < 0)
+                print(line + ": " + lineString)
+            else {
+                print(line + ": " + lineString.substring(0,pc)
+                        + Console.RED + lineString.substring(pc,pc+1)
+                        + Console.RESET + lineString.substring(pc+1))
+            }
             println()
             line += 1
         }
         println()
 
         //Display data
-        for(x <- Range(-10,10)) {
-            printf("|%1$4".format(x))
+        for(x:Int <- -10 to 10) {
+            printf("|%1$4d".format(x))
         }
         println()
-        for(x <- Range(-10,10)) {
-            printf("|%1$4".format(interpreter.getData(x)))
+        for(x:Int <- -10 to 10) {
+            printf("|%1$4d".format(interpreter.getData(x)))
         }
+        println()
     }
 
 
