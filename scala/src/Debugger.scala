@@ -13,6 +13,7 @@ class Debugger {
 
     def debug(program:Array[String], interpreter:Interpreter) {
         var running = true
+        interpreter.debug = true
         interpreter.startProgram()
         while(interpreter.getNumThreads() > 0) {
             display(program, interpreter)

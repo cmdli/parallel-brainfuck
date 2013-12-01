@@ -40,6 +40,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
         Controller ! Finish
     }
 
+    var debug:Boolean = false
     def startProgram() {
         threads = Array.fill[LinkedList[Process]](programOps.length){new LinkedList[Process]()}
         Controller ! Start(0, sizeOfData/2)
@@ -90,7 +91,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                         val process: Process = new Process(programOps, line, dataPointer)
                         numThreads += 1
                         process.registerPipes()
-                        if(debugging)
+                        if(debug)
                             threads(line) = threads(line) :+ process
                         else
                             process.start()
