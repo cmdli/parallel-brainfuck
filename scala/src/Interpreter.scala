@@ -80,7 +80,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     case object NumThreads
 
     object Controller extends Actor {
-        var numThreads: Int = 0
+        @volatile var numThreads: Int = 0
 
         def act() {
             loop {
@@ -106,19 +106,25 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case StepAll => for(lineT <- threads) {for(t <- lineT) t.step()}; reply{true}
                     case Continue => {
                         var breakpointReached = false
+                        var iteration = 0
                         while(numThreads > 0 && !breakpointReached) {
                             var line = 0
                             while(line < threads.length) {
                                 val lineT = threads(line)
                                 for(t <- lineT) {
-                                    t.step()
+                                    if(!t.step()) {
+                                        numThreads -= 1
+                                        t.deregisterPipes()
+                                    }
                                     if(breakpoints.get(line) match {
                                         case Some(set: HashSet[Int]) => set.contains(t.pc)
                                         case None => false})
                                         breakpointReached = true
                                 }
+                                line += 1
                             }
                         }
+                        reply{true}
                     }
                     case Breakpoint(pc:Int, line:Int) => breakpoints.get(line) match {
                         case Some(set: HashSet[Int]) => set += pc
@@ -130,6 +136,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case Stop(process, line) => {
                         numThreads -= 1
                         process.deregisterPipes()
+                        println("numThreads: " + numThreads)
                     }
                     case Wait => if (numThreads == 0) reply {true}
                     case Finish => exit()
@@ -175,14 +182,15 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             exit()
         }
 
-        def step() {
+
+        def step():Boolean = {
             if(pc < lineOps.length) {
                 runOp()
                 pc += 1
+                true
             }
             else {
-                Controller ! Stop(this, line)
-                exit()
+                false
             }
 
         }
