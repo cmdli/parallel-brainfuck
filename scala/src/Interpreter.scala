@@ -8,23 +8,23 @@ import scala.collection.mutable
  **/
 class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     // Should be big enough
-    val sizeOfData =  1000000
-    
+    val sizeOfData = 1000000
+
     // Makes a zeroed out array.
     var dataArr = Array.fill[AtomicInteger](sizeOfData)(new AtomicInteger(0))
 
     var pipeHandlers: Array[Phaser] = {
-      var most = 0 // columns
-      for (lineOps: List[Operation] <- programOps) {
-        most = math.max(lineOps.size,most)
-      }
-      val array: Array[Phaser] = new Array[Phaser](most)
-      for (i <- 0 to (most - 1)) {
-        array(i) = new Phaser() {
-          override def onAdvance(phase: Int, registeredParties: Int): Boolean = false
+        var most = 0 // columns
+        for (lineOps: List[Operation] <- programOps) {
+            most = math.max(lineOps.size, most)
         }
-      }
-      array
+        val array: Array[Phaser] = new Array[Phaser](most)
+        for (i <- 0 to (most - 1)) {
+            array(i) = new Phaser() {
+                override def onAdvance(phase: Int, registeredParties: Int): Boolean = false
+            }
+        }
+        array
     }
 
     def runProgram(): Unit = {
@@ -33,6 +33,8 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
         Controller ! Finish
     }
 
+    def getData(index: Int): Int = dataArr(index).get()
+
     case class Stop(p: Process, line: Int)
     case class Start(line: Int, dataPointer: Int)
     case class CanIRun(line: Int)
@@ -40,37 +42,38 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     case class LetThisRun(line: Int)
     case object Wait
     case object Finish
+    case class Step(line:Int)
 
     object Controller extends Actor {
-        var numThreads: Int = 0;
+        var numThreads: Int = 0
 
-        def act {
-          loop {
-            react {
-              case Start(line, dataPointer) => {
-                if(line >= programOps.length)
-                    println("Error in fork: starting line " + line + " when max line is " + (programOps.length-1))
-                val process: Process = new Process(programOps, line, dataPointer)
-                numThreads += 1
-                process.registerPipes()
-                process.start()
-                reply {true}
-              }
+        def act() {
+            loop {
+                react {
+                    case Start(line, dataPointer) => {
+                        if (line >= programOps.length)
+                            println("Error in fork: starting line " + line + " when max line is " + (programOps.length - 1))
+                        val process: Process = new Process(programOps, line, dataPointer)
+                        numThreads += 1
+                        process.registerPipes()
+                        process.start()
+                        reply {true}
+                    }
 
-              // *** START JUST FOR DEBUGGING *** //
-              case CanIRun(lineOfRequester) if ((lineOfRequester == processLine) || anyoneCanRun) => anyoneCanRun = false; reply{true}
-              case LetThisRun(lineToRun) => processLine = lineToRun
-              case LetAnyoneRun => anyoneCanRun = true
-              // *** END JUST FOR DEBUGGING *** //
+                    // *** START JUST FOR DEBUGGING *** //
+                    case CanIRun(lineOfRequester) => if ((lineOfRequester == processLine) || anyoneCanRun) anyoneCanRun = false; reply {true}
+                    case LetThisRun(lineToRun) => processLine = lineToRun
+                    case LetAnyoneRun => anyoneCanRun = true
+                    // *** END JUST FOR DEBUGGING *** //
 
-              case Stop(process, line) => {
-                numThreads -= 1
-                process.deregisterPipes()
-              }
-              case Wait if (numThreads == 0) => reply { true }
-              case Finish => exit()
+                    case Stop(process, line) => {
+                        numThreads -= 1
+                        process.deregisterPipes()
+                    }
+                    case Wait => if (numThreads == 0) reply {true}
+                    case Finish => exit()
+                }
             }
-          }
         }
 
         this.start()
@@ -83,25 +86,24 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     var breakpoints: mutable.HashMap[Int, mutable.HashSet[Int]] = new mutable.HashMap[Int, mutable.HashSet[Int]]
 
 
-  class Process(programOps: List[List[Operation]], line: Int, var dataPointer: Int) extends Actor {
+    class Process(programOps: List[List[Operation]], line: Int, var dataPointer: Int) extends Actor {
 
-        def act = run()
+        def act() = run()
 
         var pc = 0
 
         val lineOps = programOps(line)
-
 
         def run() {
             val maxPC: Int = lineOps.length
 
             while (pc < maxPC) {
                 if (debugging) {
-                  Controller !? CanIRun(line)
+                    Controller !? CanIRun(line)
 
-                  if (stepping || isBreakpointAtPC()) {
-                    debuggingStepper()
-                  }
+                    if (stepping || isBreakpointAtPC) {
+                        debuggingStepper()
+                    }
                 }
                 runOp()
                 pc += 1
@@ -112,14 +114,25 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             exit()
         }
 
-      // *** START JUST FOR DEBUGGING *** //
-      def isBreakpointAtPC(): Boolean = {
-          var breakpointAtPC = false
-          breakpoints.get(line) match {
-            case Some(set: mutable.HashSet[Int]) => if (set contains pc) breakpointAtPC = true
-            case None => ()
-          }
-          breakpointAtPC
+        def step() {
+            if(pc < lineOps.length) {
+                runOp()
+                pc += 1
+            }
+        }
+
+        // *** START JUST FOR DEBUGGING *** //
+        def isBreakpointAtPC: Boolean = {
+            var breakpointAtPC = false
+            breakpoints.get(line) match {
+                case Some(set: mutable.HashSet[Int]) => if (set contains pc) breakpointAtPC = true
+                case None => ()
+            }
+            breakpointAtPC
+        }
+
+        def waitAtBreakpoints() {
+
         }
 
         def debuggingStepper() {
@@ -129,49 +142,49 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             var continueCommandEntered: Boolean = false
             while (!continueCommandEntered) {
 
-              val BreakpointPattern1 = "(b\\s+)([0-9]+)".r
-              val BreakpointPattern2 = "(b\\s+)([0-9]+)(\\s+)([0-9]+)".r
-              val SwitchPattern = "(switch\\s+)([0-9]+)".r
-              val DataPattern = "(data\\s+)([0-9]+)".r
+                val BreakpointPattern1 = "(b\\s+)([0-9]+)".r
+                val BreakpointPattern2 = "(b\\s+)([0-9]+)(\\s+)([0-9]+)".r
+                val SwitchPattern = "(switch\\s+)([0-9]+)".r
+                val DataPattern = "(data\\s+)([0-9]+)".r
 
-              print("> ")
-              val command: String = readLine()
-              command match {
-                case "h" => helpCommands(); continueCommandEntered = false
-                case "c" => stepping = false; continueCommandEntered = true
-                case "s" => stepping = true; continueCommandEntered = true
-                case BreakpointPattern1(_, pcNumber) => {
+                print("> ")
+                val command: String = readLine()
+                command match {
+                    case "h" => helpCommands(); continueCommandEntered = false
+                    case "c" => stepping = false; continueCommandEntered = true
+                    case "s" => stepping = true; continueCommandEntered = true
+                    case BreakpointPattern1(_, pcNumber) => {
 
-                  breakpoints.get(line) match {
-                    case Some(set: mutable.HashSet[Int]) => set += pcNumber.toInt
-                    case None => breakpoints += ((line, new mutable.HashSet[Int]() += pcNumber.toInt))
-                  }
+                        breakpoints.get(line) match {
+                            case Some(set: mutable.HashSet[Int]) => set += pcNumber.toInt
+                            case None => breakpoints += ((line, new mutable.HashSet[Int]() += pcNumber.toInt))
+                        }
 
-                  println("Breakpoint registered at pc: " + pcNumber)
-                  continueCommandEntered = false
+                        println("Breakpoint registered at pc: " + pcNumber)
+                        continueCommandEntered = false
+                    }
+                    case BreakpointPattern2(_, pcNumber, _, lineNumber) => {
+
+                        breakpoints.get(lineNumber.toInt) match {
+                            case Some(set: mutable.HashSet[Int]) => set += pcNumber.toInt
+                            case None => breakpoints += ((lineNumber.toInt, new mutable.HashSet[Int]() += pcNumber.toInt))
+                        }
+
+                        println("Breakpoint registered at pc: " + pcNumber + " and line: " + lineNumber)
+                        continueCommandEntered = false
+                    }
+                    case SwitchPattern(_, lineNumber) => {
+                        stepping = true
+                        Controller ! LetThisRun(lineNumber.toInt)
+                        Controller !? CanIRun(line)
+                        continueCommandEntered = true
+                    }
+                    case DataPattern(_, position) => {
+                        println("Data at position: " + position + " is: " + dataArr(position.toInt + dataPointer))
+                        continueCommandEntered = false
+                    }
+                    case _ => println("Invalid command. Press h to see all commands."); continueCommandEntered = false
                 }
-                case BreakpointPattern2(_, pcNumber, _, lineNumber) => {
-
-                  breakpoints.get(lineNumber.toInt) match {
-                    case Some(set: mutable.HashSet[Int]) => set += pcNumber.toInt
-                    case None => breakpoints += ((lineNumber.toInt, new mutable.HashSet[Int]() += pcNumber.toInt))
-                  }
-
-                  println("Breakpoint registered at pc: " + pcNumber + " and line: " + lineNumber)
-                  continueCommandEntered = false
-                }
-                case SwitchPattern(_, lineNumber) => {
-                  stepping = true
-                  Controller ! LetThisRun(lineNumber.toInt)
-                  Controller !? CanIRun(line)
-                  continueCommandEntered = true
-                }
-                case DataPattern(_, position) => {
-                  println("Data at position: " + position + " is: " + dataArr(position.toInt + dataPointer))
-                  continueCommandEntered = false
-                }
-                case _ => println("Invalid command. Press h to see all commands."); continueCommandEntered = false
-              }
             }
         }
 
@@ -183,12 +196,13 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             printf("%-30s%s\n", "switch {line}", "change debugger to start executing specified line")
             printf("%-30s%s\n", "data {position}", "prints the value of the data at the specified offset from the current data pointer")
 
-          println()
+            println()
         }
-      // *** END JUST FOR DEBUGGING *** //
+
+        // *** END JUST FOR DEBUGGING *** //
 
 
-      // Run one operation.
+        // Run one operation.
         def runOp(): Unit = lineOps(pc) match {
             case AddOperation() => add()
             case SubOperation() => subtract()
@@ -217,16 +231,16 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
 
         // Jump to the matching end ] if the current data is 0.
         def startLoop(jump: Int) = {
-          if (dataArr(dataPointer).get == 0) {
-            pc += jump
-          }
+            if (dataArr(dataPointer).get == 0) {
+                pc += jump
+            }
         }
 
         // Return to the matching start [ if the current data is not 0.
         def endLoop(jump: Int) {
-          if (dataArr(dataPointer).get != 0) {
-            pc -= jump
-          }
+            if (dataArr(dataPointer).get != 0) {
+                pc -= jump
+            }
         }
 
         def fork() {
@@ -239,21 +253,22 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
         }
 
         def deregisterPipes() = {
-          for (i <- 0 to lineOps.size - 1) {
-            lineOps(i) match {
-              case PipeOperation() => pipeHandlers(i).arriveAndDeregister()
-              case _ => ()
+            for (i <- 0 to lineOps.size - 1) {
+                lineOps(i) match {
+                    case PipeOperation() => pipeHandlers(i).arriveAndDeregister()
+                    case _ => ()
+                }
             }
-          }
         }
 
         def registerPipes() = {
             for (i <- 0 to lineOps.size - 1) {
-              lineOps(i) match {
-                case PipeOperation() => pipeHandlers(i).register()
-                case _ => ()
-              }
+                lineOps(i) match {
+                    case PipeOperation() => pipeHandlers(i).register()
+                    case _ => ()
+                }
             }
         }
     }
+
 }
