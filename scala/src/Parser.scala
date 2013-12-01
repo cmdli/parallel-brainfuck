@@ -52,8 +52,8 @@ class Parser extends RegexParsers {
     }
 
     def loop: Parser[List[Operation]] = (("[" ~> block <~ "]") | "[]") ^^  {
-        case ops:List[Operation] =>
-            (StartLoopOperation(ops.length+1) +: ops) :+ EndLoopOperation(ops.length+1)
-        case "[]" => List(StartLoopOperation(1), EndLoopOperation(1))
+      case ops:List[Operation] =>
+        (StartLoopOperation(ops.length+1) +: ops) :+ EndLoopOperation(ops.length+1)
+      case "[]" => List(StartLoopOperation(1), EndLoopOperation(1))
     }
 }
