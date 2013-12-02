@@ -129,8 +129,8 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case LetAnyoneRun => anyoneCanRun = true
                     case Breakpoint(pc:Int, line:Int) => breakpoints.get(line) match {
                         case Some(set: HashSet[Int]) => set += pc
-                        case None => breakpoints += ((line, HashSet[Int]() += pc))
-                    }
+                        case None => breakpoints += ((line, new mutable.HashSet[Int]() += pc))
+                    }; reply{true}
                     case NumThreads => reply{numThreads}
                     // *** END JUST FOR DEBUGGING *** //
 

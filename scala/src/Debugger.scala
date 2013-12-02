@@ -32,7 +32,7 @@ class Debugger {
             case "s" => println("Stepping all threads...");interpreter.stepAll()
             case "c" => println("Continuing...");interpreter.continue() //Continue until a thread hits a breakpoint
             //case BreakpointPattern1(_, pc) => interpreter.addBreakpoint(pc)
-            case BreakpointPattern2(pc,line) => printf("Breakpoint at (%d,%d)\n", pc, line); interpreter.addBreakpoint(pc.toInt,line.toInt)
+            case BreakpointPattern2(pc,line) => printf("Breakpoint at (%s,%s)\n", pc, line); interpreter.addBreakpoint(pc.toInt,line.toInt)
             case "h" => helpCommands()
             case _ => ()
         }
