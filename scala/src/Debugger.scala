@@ -58,7 +58,7 @@ class Debugger {
             while (instance < getNumProcessesOfLine(interpreter, line)) {
               //TODO: Handle multiple threads per line (With a list)
               val pc:Int = getPC(interpreter, line, instance)
-              if(pc < 0)
+              if(pc < 0 || pc > lineString.length)
                 printf("\n%-5s %s", instance + ":", lineString)
               else {
                 printf("\n%-5s %s", instance + ":", lineString.substring(0,pc)

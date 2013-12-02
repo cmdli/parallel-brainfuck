@@ -137,6 +137,10 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     case Stop(process, line) => {
                         numThreads -= 1
                         process.deregisterPipes()
+                        if(debug) { //Remove the process from the list of threads
+                            val (left,right) = threads(line).span(_ != process)
+                            threads(line) = left.append(right.tail)
+                        }
                         reply{true}
                     }
                     case Wait if (numThreads == 0) => reply {true}
