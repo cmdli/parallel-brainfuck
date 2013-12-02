@@ -96,9 +96,11 @@ class Debugger {
                 printf(line + ": ")
                 var oldPC = 0
                 for(pc <- pcs) {
-                    printf(lineString.substring(oldPC,pc)
-                            + Console.RED + lineString.substring(pc,pc+1)
-                            + Console.RESET)
+                    if(pc < lineString.length) {
+                        printf(lineString.substring(oldPC,pc)
+                                + Console.RED + lineString.substring(pc,pc+1)
+                                + Console.RESET)
+                    }
                     oldPC = pc
                 }
                 printf(lineString.substring(oldPC))
