@@ -196,13 +196,15 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
         var awaitingPhaser = -1
         def step() = {
             if(awaitingPhaser != -1) {
-                if(pipeHandlers(pc).getPhase != awaitingPhaser)
+                if(pipeHandlers(pc).getPhase != awaitingPhaser) {
                     awaitingPhaser = -1
+                    pc += 1
+                }
             }
             if(awaitingPhaser == -1) {
                 if(pc < lineOps.length) {
                     lineOps(pc) match {
-                    case PipeOperation() => pipeHandlers(pc).arrive(); awaitingPhaser = pipeHandlers(pc).getPhase
+                    case PipeOperation() => pipeHandlers(pc).arrive(); awaitingPhaser = pipeHandlers(pc).getPhase; pc -= 1
                     case _ => runOp()
                     }
                     pc += 1
