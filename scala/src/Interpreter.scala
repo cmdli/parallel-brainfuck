@@ -4,6 +4,7 @@ import scala.actors.Actor
 import scala.collection.mutable
 import scala.collection.mutable.LinkedList
 import scala.collection.mutable.HashSet
+import scala.util.Sorting.quickSort
 
 /**
  * Performs the actions specified by the BK program.
@@ -49,8 +50,23 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     def getData(index: Int): Int = dataArr(index+sizeOfData/2).get()
     def getThreads() = threads
     def step(line:Int) {
+        if(line >= threads.length) {
+            println("Line index out of bounds!")
+            return
+        }
         for(t <- threads(line))
             t.step()
+    }
+    def step(line:Int, thread:Int) {
+        if(line >= threads.length) {
+            println("Line index out of bounds!")
+            return
+        }
+        if(thread >= threads(line).length) {
+            println("Thread index out of bounds!")
+            return
+        }
+        threads(line)(thread).step()
     }
     def continue() {
         var breakpointReached = false
@@ -76,19 +92,20 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     }
     def addBreakpoint(pc:Int, line:Int) = Controller !? Breakpoint(pc,line)
     def getNumThreads():Int = (Controller !? NumThreads).asInstanceOf[Int]
-    def getPCs(line:Int):Array[Int] = {
+    def getPCs(line:Int):Array[(Int,Int)] = {
         if(debug) {
             threads(line) match {
                 case t:LinkedList[Process] => {
-                    var b:Array[Int] = new Array[Int](t.size)
-                    for(i <- 0 to (b.length - 1)) b(i) = t(i).pc
+                    var b:Array[(Int,Int)] = new Array[(Int,Int)](t.size)
+                    for(i <- 0 to (b.length - 1)) b(i) = (t(i).pc,i)
+                    quickSort(b)
                     b
                 }
-                case null => new Array[Int](0)
+                case null => new Array[(Int,Int)](0)
             }
         }
         else
-            new Array[Int](0)
+            new Array[(Int,Int)](0)
     }
 
     case class Stop(p: Process, line: Int)
