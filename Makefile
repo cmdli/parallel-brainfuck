@@ -12,3 +12,5 @@ debug:
 	scala -classpath $(BINDIR) TestDebugger
 run:
 	scala -classpath $(BINDIR) Brainkkake examples/hello-alter.bk
+%:
+	scala -classpath $(BINDIR) Brainkkake examples/$*
