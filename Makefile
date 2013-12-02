@@ -8,5 +8,7 @@ exec:
 	scala -classpath $(BINDIR) TestExecutor
 parse:
 	scala -classpath $(BINDIR) TestParser
+debug:
+	scala -classpath $(BINDIR) TestDebugger
 run:
 	scala -classpath $(BINDIR) Brainkkake examples/hello-alter.bk
