@@ -97,19 +97,21 @@ class Debugger {
                 printf(line + ": " + lineString + " 0")
             else {
                 printf(line + ": ")
-                var oldPC = 0
+                var oldPC = -1
                 for((pc,num) <- pcs) {
-                    if(pc < lineString.length && oldPC < lineString.length) {
-                        printf(lineString.substring(oldPC,pc))
+                    if(pc < lineString.length) {
+                        if(oldPC < pc)
+                            printf(lineString.substring(oldPC+1,pc))
                         if(useNums)
                             printf(Console.RED + num)
-                        else if(oldPC != pc + 1)
+                        else if(oldPC != pc)
                             printf(Console.RED + lineString.substring(pc,pc+1))
                         printf(Console.RESET)
                     }
-                    oldPC = pc+1
+                    oldPC = pc
                 }
-                printf(lineString.substring(oldPC))
+                if(oldPC < lineString.length - 1)
+                    printf(lineString.substring(oldPC+1))
                 printf(" " + pcs.length)
             }
             println()
