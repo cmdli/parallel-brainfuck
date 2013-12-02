@@ -101,14 +101,13 @@ class Debugger {
                 for((pc,num) <- pcs) {
                     if(pc < lineString.length) {
                         printf(lineString.substring(oldPC,pc))
-                        if(useNums) {
+                        if(useNums)
                             printf(Console.RED + num)
-                        }
-                        else
+                        else if(oldPC != pc + 1)
                             printf(Console.RED + lineString.substring(pc,pc+1))
                         printf(Console.RESET)
                     }
-                    oldPC = pc
+                    oldPC = pc+1
                 }
                 printf(lineString.substring(oldPC))
                 printf(" " + pcs.length)
