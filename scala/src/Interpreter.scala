@@ -221,7 +221,14 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             if(awaitingPhaser == -1) {
                 if(pc < lineOps.length) {
                     lineOps(pc) match {
-                    case PipeOperation() => awaitingPhaser = pipeHandlers(pc).getPhase; pipeHandlers(pc).arrive(); pc -= 1
+                    case PipeOperation() => {
+                        awaitingPhaser = pipeHandlers(pc).getPhase
+                        pipeHandlers(pc).arrive()
+                        if(pipeHandlers(pc).getPhase != awaitingPhaser)
+                            awaitingPhaser = -1
+                        else
+                            pc -= 1
+                    }
                     case _ => runOp()
                     }
                     pc += 1
