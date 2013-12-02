@@ -91,7 +91,7 @@ class Debugger {
             //TODO: Handle multiple threads per line (With a list)
             val pcs:Array[Int] = interpreter.getPCs(line)
             if(pcs.length == 0)
-                printf(line + ": " + lineString)
+                printf(line + ": " + lineString + " 0")
             else {
                 printf(line + ": ")
                 var oldPC = 0
@@ -104,6 +104,7 @@ class Debugger {
                     oldPC = pc
                 }
                 printf(lineString.substring(oldPC))
+                printf(" " + pcs.length)
             }
             println()
             line += 1
