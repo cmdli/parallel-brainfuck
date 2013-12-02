@@ -99,7 +99,7 @@ class Debugger {
                 printf(line + ": ")
                 var oldPC = 0
                 for((pc,num) <- pcs) {
-                    if(pc < lineString.length) {
+                    if(pc < lineString.length && oldPC < lineString.length) {
                         printf(lineString.substring(oldPC,pc))
                         if(useNums)
                             printf(Console.RED + num)
