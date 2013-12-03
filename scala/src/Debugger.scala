@@ -1,6 +1,3 @@
-import scala.collection.mutable
-import scala.collection.mutable.HashSet
-
 /**
  * Provides a debugging interface to the interpreter
  */
@@ -37,53 +34,8 @@ class Debugger {
             case BreakpointPattern2(pc,line) => printf("Breakpoint at (%s,%s)\n", pc, line); interpreter.addBreakpoint(pc.toInt,line.toInt)
             case "h" => helpCommands()
             case "t" => displayLines(program,interpreter,useNums = true)
-            case _ => ()
+            case _ => println("Invalid instruction!")
         }
-    }
-
-    def display(program:Array[String], interpreter:Interpreter) {
-
-        var line = 0
-        while(line < program.length) {
-            val lineString = program(line)
-
-            println("\nInstances of line " + line + ":")
-
-            if (getNumProcessesOfLine(interpreter, line) == 0) {
-              println("No Instances")
-            }
-            else {
-              // Label instance information
-              printf("\n%-5s %s", "id", "line code")
-            }
-
-            var instance = 0
-            while (instance < getNumProcessesOfLine(interpreter, line)) {
-              //TODO: Handle multiple threads per line (With a list)
-              val pc:Int = getPC(interpreter, line, instance)
-              if(pc < 0 || pc > lineString.length)
-                printf("\n%-5s %s", instance + ":", lineString)
-              else {
-                printf("\n%-5s %s", instance + ":", lineString.substring(0,pc)
-                                                    + Console.RED + lineString.substring(pc,pc+1)
-                                                    + Console.RESET + lineString.substring(pc+1))
-              }
-              println()
-              instance += 1
-            }
-            line += 1
-        }
-        println()
-
-        //Display data
-        for(x:Int <- -10 to 10) {
-            printf("|%1$4d".format(x))
-        }
-        println()
-        for(x:Int <- -10 to 10) {
-            printf("|%1$4d".format(interpreter.getData(x)))
-        }
-        println()
     }
 
     def displayLines(program:Array[String], interpreter:Interpreter, useNums:Boolean = false) {
@@ -94,7 +46,7 @@ class Debugger {
             //TODO: Handle multiple threads per line (With a list)
             val pcs:Array[(Int,Int)] = interpreter.getPCs(line)
             if(pcs.length == 0)
-                printf(line + ": " + lineString + " 0")
+                printf(line + ": " + lineString + " 0 instances")
             else {
                 printf(line + ": ")
                 var oldPC = -1
@@ -112,7 +64,7 @@ class Debugger {
                 }
                 if(oldPC < lineString.length - 1)
                     printf(lineString.substring(oldPC+1))
-                printf(" " + pcs.length)
+                printf(" " + pcs.length + " instance(s)")
             }
             println()
             line += 1

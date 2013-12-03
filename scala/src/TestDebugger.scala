@@ -9,7 +9,7 @@ object TestDebugger {
         val source = "+**++++[>+++++[>++<-]<-]>>.\n<+|"
         val program = parser.parse(source).get
         println(program)
-        val i = new Interpreter(program, true)
+        val i = new Interpreter(program)
         debug.debug(source.split("\n"),i)
     }
 }

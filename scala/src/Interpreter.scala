@@ -9,7 +9,7 @@ import scala.util.Sorting.quickSort
 /**
  * Performs the actions specified by the BK program.
  **/
-class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
+class Interpreter(programOps: List[List[Operation]]) {
     // Should be big enough
     val sizeOfData = 1000000
 
@@ -34,7 +34,7 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
     }
 
     def runProgram(): Unit = {
-        if(debugging)
+        if(debug)
             threads = Array.fill[LinkedList[Process]](programOps.length){new LinkedList[Process]()}
         Controller ! Start(0, sizeOfData / 2)
         Controller !? Wait
@@ -110,9 +110,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
 
     case class Stop(p: Process, line: Int)
     case class Start(line: Int, dataPointer: Int)
-    case class CanIRun(line: Int, process: Int) // Process means which instance of the line the requestor is.
-    case object LetAnyoneRun
-    case class LetThisRun(line: Int)
     case object Wait
     case object Finish
     case class Step(line:Int)
@@ -141,9 +138,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
                     }
 
                     // *** START JUST FOR DEBUGGING *** //
-                    case CanIRun(lineOfRequester, instance) if ((lineOfRequester == processLine) && (processInstance == instance)) => reply {true}
-                    case LetThisRun(lineToRun) => processLine = lineToRun
-                    case LetAnyoneRun => anyoneCanRun = true
                     case Breakpoint(pc:Int, line:Int) => breakpoints.get(line) match {
                         case Some(set: HashSet[Int]) => set += pc
                         case None => breakpoints += ((line, new mutable.HashSet[Int]() += pc))
@@ -169,10 +163,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
         this.start()
     }
 
-    var processLine = 0
-    var processInstance = 0
-    var anyoneCanRun = false
-    var stepping: Boolean = debugging
     // Line -> breakpoints in each line
     var breakpoints: mutable.HashMap[Int, mutable.HashSet[Int]] = new mutable.HashMap[Int, mutable.HashSet[Int]]
 
@@ -195,13 +185,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             val maxPC: Int = lineOps.length
 
             while (pc < maxPC) {
-                if (debugging) {
-                    Controller !? CanIRun(line, instance)
-
-                    if (stepping || isBreakpointAtPC) {
-                        debuggingStepper()
-                    }
-                }
                 runOp()
                 pc += 1
             }
@@ -239,83 +222,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
             }
 
         }
-
-        // *** START JUST FOR DEBUGGING *** //
-        def isBreakpointAtPC: Boolean = {
-            var breakpointAtPC = false
-            breakpoints.get(line) match {
-                case Some(set: mutable.HashSet[Int]) => if (set contains pc) breakpointAtPC = true
-                case None => ()
-            }
-            breakpointAtPC
-        }
-
-        def debuggingStepper() {
-            println("\nCurrent instruction: " + lineOps(pc) + " at pc: " + pc + " in line: " + line)
-            println("What do you want to do? (h for help)")
-
-            var continueCommandEntered: Boolean = false
-            while (!continueCommandEntered) {
-
-                val BreakpointPattern1 = "(b\\s+)([0-9]+)".r
-                val BreakpointPattern2 = "(b\\s+)([0-9]+)(\\s+)([0-9]+)".r
-                val SwitchPattern = "(switch\\s+)([0-9]+)".r
-                val DataPattern = "(data\\s+)([0-9]+)".r
-
-                print("> ")
-                val command: String = readLine()
-                command match {
-                    case "h" => helpCommands(); continueCommandEntered = false
-                    case "c" => stepping = false; continueCommandEntered = true
-                    case "s" => stepping = true; continueCommandEntered = true
-                    case BreakpointPattern1(_, pcNumber) => {
-
-                        breakpoints.get(line) match {
-                            case Some(set: mutable.HashSet[Int]) => set += pcNumber.toInt
-                            case None => breakpoints += ((line, new mutable.HashSet[Int]() += pcNumber.toInt))
-                        }
-
-                        println("Breakpoint registered at pc: " + pcNumber)
-                        continueCommandEntered = false
-                    }
-                    case BreakpointPattern2(_, pcNumber, _, lineNumber) => {
-
-                        breakpoints.get(lineNumber.toInt) match {
-                            case Some(set: mutable.HashSet[Int]) => set += pcNumber.toInt
-                            case None => breakpoints += ((lineNumber.toInt, new mutable.HashSet[Int]() += pcNumber.toInt))
-                        }
-
-                        println("Breakpoint registered at pc: " + pcNumber + " and line: " + lineNumber)
-                        continueCommandEntered = false
-                    }
-                    case SwitchPattern(_, lineNumber) => {
-                        stepping = true
-                        Controller ! LetThisRun(lineNumber.toInt)
-                        Controller !? CanIRun(line, instance)
-                        continueCommandEntered = true
-                    }
-                    case DataPattern(_, position) => {
-                        println("Data at position: " + position + " is: " + dataArr(position.toInt + dataPointer))
-                        continueCommandEntered = false
-                    }
-                    case _ => println("Invalid command. Press h to see all commands."); continueCommandEntered = false
-                }
-            }
-        }
-
-        def helpCommands() {
-            printf("%-30s%s\n", "s", "step one instruction")
-            printf("%-30s%s\n", "c", "continue execution until breakpoint or completion")
-            printf("%-30s%s\n", "b {pc}", "set breakpoint at specified program counter within the current line")
-            printf("%-30s%s\n", "b {pc} {line}", "set breakpoint at specified program counter within the specified line")
-            printf("%-30s%s\n", "switch {line}", "change debugger to start executing specified line")
-            printf("%-30s%s\n", "data {position}", "prints the value of the data at the specified offset from the current data pointer")
-
-            println()
-        }
-
-        // *** END JUST FOR DEBUGGING *** //
-
 
         // Run one operation.
         def runOp(): Unit = lineOps(pc) match {
@@ -359,7 +265,6 @@ class Interpreter(programOps: List[List[Operation]], debugging: Boolean) {
         }
 
         def fork() {
-            // TODO: Make sure this is blocking
             Controller !? Start(line + dataArr(dataPointer).get, dataPointer)
         }
 

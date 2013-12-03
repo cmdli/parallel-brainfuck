@@ -4,7 +4,7 @@ object Brainkkake {
         val parser = new Parser
         for (arg: String <- args) {
             val src = Source.fromFile(arg).mkString
-            new Interpreter(parser.parse(src).get, false).runProgram()
+            new Interpreter(parser.parse(src).get).runProgram()
         }
     }
 }
