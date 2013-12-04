@@ -43,7 +43,6 @@ class Debugger {
         var line = 0
         while(line < program.length) {
             val lineString:String = program(line)
-            //TODO: Handle multiple threads per line (With a list)
             val pcs:Array[(Int,Int)] = interpreter.getPCs(line)
             if(pcs.length == 0)
                 printf(line + ": " + lineString + " 0 instances")
@@ -56,10 +55,14 @@ class Debugger {
                             printf(lineString.substring(oldPC+1,pc))
                         if(useNums)
                             printf(Console.RED + num)
-                        else if(interpreter.atPipe(line, num))
-                            printf(Console.BLUE + lineString.substring(pc,pc+1))
-                        else if(oldPC != pc)
-                            printf(Console.RED + lineString.substring(pc,pc+1))
+                        else if(oldPC != pc){
+                            if(interpreter.atPipe(line, num)) {
+                                printf(Console.BLUE + lineString.substring(pc,pc+1))
+                            }
+                            else {
+                                printf(Console.RED + lineString.substring(pc,pc+1))
+                            }
+                        }
                         printf(Console.RESET)
                     }
                     oldPC = pc

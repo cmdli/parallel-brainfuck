@@ -16,6 +16,9 @@ case class EndLoopOperation(var numLoopOps: Int) extends Operation()
 case class ForkOperation() extends Operation()
 case class InvalidOperation() extends Operation()
 case class PipeOperation() extends Operation()
+case class ForkUpOperation() extends Operation()
+case class ForkDownOperation() extends Operation()
+case class ForkSelfOperation() extends Operation()
 
 class Parser extends RegexParsers {
 
@@ -50,6 +53,8 @@ class Parser extends RegexParsers {
         case "<" => new ShiftLeftOperation()
         case "*" => new ForkOperation()
         case "|" => new PipeOperation()
+        case "^" => new ForkUpOperation()
+        case "v" => new ForkDownOperation()
         case _ => new InvalidOperation()
     }
 

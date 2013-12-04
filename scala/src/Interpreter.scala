@@ -93,12 +93,9 @@ class Interpreter(programOps: List[List[Operation]]) {
             for(t <- lineT)
                 t.step()
     }
-    def atPipe(line:Int, thread:Int):Boolean = {
-        println("line: " + line + " thread: " + thread)
-        if(line < threads.length && thread < threads(line).length)
-            threads(line)(thread).awaitingPhaser != -1
-        false
-    }
+    def atPipe(line:Int, thread:Int):Boolean = (line < threads.length
+                                                && thread < threads(line).length
+                                                && threads(line)(thread).awaitingPhaser != -1)
     def addBreakpoint(pc:Int, line:Int) = Controller !? Breakpoint(pc,line)
     def getNumThreads():Int = (Controller !? NumThreads).asInstanceOf[Int]
     def getPCs(line:Int):Array[(Int,Int)] = {
@@ -106,10 +103,7 @@ class Interpreter(programOps: List[List[Operation]]) {
             threads(line) match {
                 case t:LinkedList[Process] => {
                     var b:Array[(Int,Int)] = new Array[(Int,Int)](t.size)
-                    for(i <- 0 to (b.length - 1)) {
-                        println(i)
-                        b(i) = (t(i).pc,i)
-                    }
+                    for(i <- 0 to (b.length - 1)) b(i) = (t(i).pc,i)
                     quickSort(b)
                     b
                 }
