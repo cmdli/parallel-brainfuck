@@ -56,6 +56,8 @@ class Debugger {
                             printf(lineString.substring(oldPC+1,pc))
                         if(useNums)
                             printf(Console.RED + num)
+                        else if(interpreter.atPipe(line, num))
+                            printf(Console.BLUE + lineString.substring(pc,pc+1))
                         else if(oldPC != pc)
                             printf(Console.RED + lineString.substring(pc,pc+1))
                         printf(Console.RESET)

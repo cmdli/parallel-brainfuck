@@ -24,7 +24,11 @@ class Parser extends RegexParsers {
     //Parse a program string
     def parse(code: String) = parseAll(program, code)
 
-    def program: Parser[List[List[Operation]]] = rep(line|block)
+    def program: Parser[List[List[Operation]]] = rep(line|block|emptyLine)
+
+    def emptyLine: Parser[List[Operation]] = "\n" ^^ {
+      case b => List[Operation]()
+    }
 
     def line: Parser[List[Operation]] = (block <~ "\n") ^^ {
         case b => b

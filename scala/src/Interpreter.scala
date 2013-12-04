@@ -34,8 +34,11 @@ class Interpreter(programOps: List[List[Operation]]) {
     }
 
     def runProgram(): Unit = {
-        if(debug)
-            threads = Array.fill[LinkedList[Process]](programOps.length){new LinkedList[Process]()}
+        if(debug) {
+            threads = new Array[mutable.LinkedList[Process]](programOps.length)
+            for(i <- 0 to threads.length - 1)
+                threads(i) = new LinkedList[Process]
+        }
         Controller ! Start(0, sizeOfData / 2)
         Controller !? Wait
         Controller ! Finish
@@ -90,6 +93,12 @@ class Interpreter(programOps: List[List[Operation]]) {
             for(t <- lineT)
                 t.step()
     }
+    def atPipe(line:Int, thread:Int):Boolean = {
+        println("line: " + line + " thread: " + thread)
+        if(line < threads.length && thread < threads(line).length)
+            threads(line)(thread).awaitingPhaser != -1
+        false
+    }
     def addBreakpoint(pc:Int, line:Int) = Controller !? Breakpoint(pc,line)
     def getNumThreads():Int = (Controller !? NumThreads).asInstanceOf[Int]
     def getPCs(line:Int):Array[(Int,Int)] = {
@@ -97,7 +106,10 @@ class Interpreter(programOps: List[List[Operation]]) {
             threads(line) match {
                 case t:LinkedList[Process] => {
                     var b:Array[(Int,Int)] = new Array[(Int,Int)](t.size)
-                    for(i <- 0 to (b.length - 1)) b(i) = (t(i).pc,i)
+                    for(i <- 0 to (b.length - 1)) {
+                        println(i)
+                        b(i) = (t(i).pc,i)
+                    }
                     quickSort(b)
                     b
                 }
@@ -201,15 +213,15 @@ class Interpreter(programOps: List[List[Operation]]) {
                     pc += 1
                 }
             }
-            if(awaitingPhaser == -1) {
+            else {
                 if(pc < lineOps.length) {
                     lineOps(pc) match {
                     case PipeOperation() => {
                         awaitingPhaser = pipeHandlers(pc).getPhase
                         pipeHandlers(pc).arrive()
-                        if(pipeHandlers(pc).getPhase != awaitingPhaser)
-                            awaitingPhaser = -1
-                        else
+                        //if(pipeHandlers(pc).getPhase != awaitingPhaser)
+                        //    awaitingPhaser = -1
+                        //else
                             pc -= 1
                     }
                     case _ => runOp()
