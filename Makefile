@@ -10,7 +10,7 @@ parse:
 	scala -classpath $(BINDIR) TestParser
 debug:
 	scala -classpath $(BINDIR) TestDebugger
-run: hello.bk
+run:
 	scala -classpath $(BINDIR) Brainkkake examples/hello.bk
 clean:
 	rm -rf $(BINDIR)
