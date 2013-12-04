@@ -11,5 +11,17 @@ object TestDebugger {
         println(program)
         val i = new Interpreter(program)
         debug.debug(source.split("\n"),i)
+
+        val sourceHelloPara = "+*|++++ +++++|[| >+++++ ++    <-|]\n" +
+                                            "* |          |[| >>+++++ +++++<<|]\n" +
+                                            "* |          |[| >>>+++      <<<|]\n" +
+                                            "  |          |[| >>>> +     <<<<|] +*\n" +
+                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | < . +++ . ----- -. ----- ---. > + . > .\n" +
+                                            ">+++++ +++++ +++++                    |.|\n"
+        val programHelloPara = parser.parse(sourceHelloPara).get
+        val j = new Interpreter(programHelloPara)
+        debug.debug(sourceHelloPara.split("\n"),j)
+
     }
+
 }
