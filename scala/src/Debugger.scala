@@ -21,6 +21,7 @@ class Debugger {
             control(command,program,interpreter)
         }
         interpreter.stopProgram()
+        println()
     }
 
 
@@ -64,8 +65,8 @@ class Debugger {
                             }
                         }
                         printf(Console.RESET)
+                        oldPC = pc
                     }
-                    oldPC = pc
                 }
                 if(oldPC < lineString.length - 1)
                     printf(lineString.substring(oldPC+1))

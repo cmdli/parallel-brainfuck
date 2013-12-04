@@ -240,6 +240,8 @@ class Interpreter(programOps: List[List[Operation]]) {
             case StartLoopOperation(jump) => startLoop(jump)
             case EndLoopOperation(jump) => endLoop(jump)
             case ForkOperation() => fork()
+            case ForkUpOperation() => forkUp()
+            case ForkDownOperation() => forkDown()
             case PipeOperation() => pipe()
             case InvalidOperation() => ()
         }
@@ -271,7 +273,19 @@ class Interpreter(programOps: List[List[Operation]]) {
         }
 
         def fork() {
-            Controller !? Start(line + dataArr(dataPointer).get, dataPointer)
+            Controller !? Start(line, dataPointer)
+        }
+
+        def forkUp() {
+            Controller !? Start(line - 1, dataPointer)
+        }
+
+        def forkDown() {
+            Controller !? Start(line + 1, dataPointer)
+        }
+
+        def forkSelf() {
+            Controller !? Start(line, dataPointer)
         }
 
         def pipe() {
