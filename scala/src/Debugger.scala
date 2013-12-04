@@ -10,17 +10,23 @@ class Debugger {
     val SwitchPattern = "(switch\\s+)([0-9]+)".r
     val DataPattern = "(data\\s+)([0-9]+)".r
 
+    var running = true
+
     def debug(program:Array[String], interpreter:Interpreter) {
         interpreter.debug = true
         interpreter.startProgram()
-        while(interpreter.getNumThreads() > 0) {
+        running = true
+        while(running) {
             displayLines(program, interpreter)
             print("(h for help) > ")
             val command = readLine()
             println()
             control(command,program,interpreter)
+            if(interpreter.getNumThreads() <= 0)
+                running = false
         }
         interpreter.stopProgram()
+        println()
     }
 
 
@@ -34,6 +40,7 @@ class Debugger {
             case BreakpointPattern2(pc,line) => printf("Breakpoint at (%s,%s)\n", pc, line); interpreter.addBreakpoint(pc.toInt,line.toInt)
             case "h" => helpCommands()
             case "t" => displayLines(program,interpreter,useNums = true)
+            case "q" => running = false
             case _ => println("Invalid instruction!")
         }
     }
@@ -43,7 +50,6 @@ class Debugger {
         var line = 0
         while(line < program.length) {
             val lineString:String = program(line)
-            //TODO: Handle multiple threads per line (With a list)
             val pcs:Array[(Int,Int)] = interpreter.getPCs(line)
             if(pcs.length == 0)
                 printf(line + ": " + lineString + " 0 instances")
@@ -56,13 +62,17 @@ class Debugger {
                             printf(lineString.substring(oldPC+1,pc))
                         if(useNums)
                             printf(Console.RED + num)
-                        else if(interpreter.atPipe(line, num))
-                            printf(Console.BLUE + lineString.substring(pc,pc+1))
-                        else if(oldPC != pc)
-                            printf(Console.RED + lineString.substring(pc,pc+1))
+                        else if(oldPC != pc){
+                            if(interpreter.atPipe(line, num)) {
+                                printf(Console.BLUE + lineString.substring(pc,pc+1))
+                            }
+                            else {
+                                printf(Console.RED + lineString.substring(pc,pc+1))
+                            }
+                        }
                         printf(Console.RESET)
+                        oldPC = pc
                     }
-                    oldPC = pc
                 }
                 if(oldPC < lineString.length - 1)
                     printf(lineString.substring(oldPC+1))
@@ -91,6 +101,7 @@ class Debugger {
         printf("%-30s%s\n", "s {line}", "steps all threads of the specified line type by one instruction")
         printf("%-30s%s\n", "s {line} {thread}", "steps the specified thread in the specified line")
         printf("%-30s%s\n", "t","displays the thread numbers for each position in code")
+        printf("%-30s%s\n", "q","quits out of the debugger")
 
         println()
     }
