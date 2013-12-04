@@ -17,12 +17,12 @@ object TestExecutor {
         executor.runProgram()
         println
 
-        val programHelloPara = parser.parse("v +++++ +++++|[| >+++++ ++    <-|]|\n" +
-                                            "v            |[| >>+++++ +++++<<|]|\n" +
-                                            "v            |[| >>>+++      <<<|]|\n" +
-                                            "             |[| >>>> +     <<<<|]|v\n" +
-                                            "> ++ . v > +. +++++ ++. . +++. > ++ .| | < . +++ . ----- -. ----- ---. > + . > .\n" +
-                                            "+++++ +++++ +++++                    |.|\n").get
+        val programHelloPara = parser.parse("+*|++++ +++++|[| >+++++ ++    <-|]|\n" +
+                                            "* |          |[| >>+++++ +++++<<|]|\n" +
+                                            "* |          |[| >>>+++      <<<|]|\n" +
+                                            "  |          |[| >>>> +     <<<<|]| +*\n" +
+                                            "> ++ .<*> > +. +++++ ++. . +++. > ++ .| | < . +++ . ----- -. ----- ---. > + . > .\n" +
+                                            ">+++++ +++++ +++++                    |.|\n").get
         executor = new Interpreter(programHelloPara)
         println("\nExpected: Hello World!\\n")
         executor.runProgram()
@@ -37,16 +37,14 @@ object TestExecutor {
         println()
 
         // Verify copy by value
-        val programValue:List[List[Operation]] = parser.parse(",>,<v>....\n" +
-                                                              "....").get
+        val programValue:List[List[Operation]] = parser.parse("+>,>,<<*>....\n>>....").get
         executor = new Interpreter(programValue)
         println("\nExpected: eight characters")
         executor.runProgram()
         println()
 
         // Verify pipe
-        val programPipe:List[List[Operation]] = parser.parse(",>,<v>.|.|.|.\n" +
-                                                             "123456.|.|.|.\n").get
+        val programPipe:List[List[Operation]] = parser.parse("+>,>,<<*>.|.|.|.\n1234567>>.|.|.|.\n").get
         executor = new Interpreter(programPipe)
         println("\nExpected: four adjacent pairs of the same characters")
         executor.runProgram()
@@ -60,7 +58,7 @@ object TestExecutor {
         println()
 
         // Prints "ABCDEF" using threads and syncing between threads within a loop
-        val programLoopSync:List[List[Operation]] = parser.parse("v+++++[>+++++++++++++<-]>-<++++++|[>+|m<-]\n012345678901234567890123456789012|[>m|,<-]").get
+        val programLoopSync:List[List[Operation]] = parser.parse("+*++++[>+++++++++++++<-]>-<++++++|[>+|m<-]\n012345678901234567890123456789012|[>m|,<-]").get
         executor = new Interpreter(programLoopSync)
         //executor.runProgram()
         println()
@@ -68,10 +66,7 @@ object TestExecutor {
         // Prints input character 36 times and verifies that we can clone concurrently without error
         executor = new Interpreter(
               parser.parse(
-                  "+++++++[>+++++++<-]>--v\n" +
-                  "vvvvvv\n" +
-                  "vvvvvv\n" +
-                  "+."
+                  "+++++++[>+++++++<-]>-->+*\n******\n******\n<+."
               ).get
         )
         println("Expected: 36 characters ending with S")
