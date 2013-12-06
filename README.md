@@ -22,13 +22,13 @@ v             [| >>>+++      <<<|]
 
 Presentation: https://docs.google.com/presentation/d/1Y8uwsh_5bmUASmyRE4i3S4fL5OvA2Q92edivIXpsEaM/edit?usp=sharing
 
-To compile: 
-make all
+To compile: <br />
+make all<br />
 
-Running modes:
-./bk {filepath} -- run any parallel brainfuck code
-./bk debug {filepath} -- run code in debugging mode
-make exec -- run small test suite
+Running modes:<br />
+./bk {filepath} -- run any parallel brainfuck code<br />
+./bk debug {filepath} -- run code in debugging mode<br />
+make exec -- run small test suite<br />
  
 
 Note: The idea to use RegexParser and case classes in parsing came from a quick glance at the code from this project: https://github.com/j5ik2o/brainfuck-scala
