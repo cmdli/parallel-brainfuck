@@ -32,3 +32,5 @@ make exec -- run small test suite<br />
  
 
 Note: The idea to use RegexParser and case classes in parsing came from a quick glance at the code from this project: https://github.com/j5ik2o/brainfuck-scala
+
+There are two side projects to this repo: a [JIT for the language](https://bitbucket.org/wjmelements/bukkake) and a [Go implementation](https://github.com/cmdli/gokkake).
